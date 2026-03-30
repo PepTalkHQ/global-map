@@ -394,6 +394,51 @@
     flex-shrink: 0;
   }
 
+  /* Kiosk breakdown */
+  .kiosk-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .kiosk-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+  }
+  .kiosk-card .kiosk-name {
+    font-family: 'Lexend', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+  .kiosk-card .kiosk-location {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+  .kiosk-card .kiosk-score {
+    font-family: 'Lexend', sans-serif;
+    font-size: 42px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .kiosk-card .kiosk-bar {
+    height: 6px;
+    border-radius: 3px;
+    margin-bottom: 12px;
+  }
+  .kiosk-card .kiosk-checkins {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .kiosk-card .kiosk-checkins strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
   /* Apex chart overrides */
   .apexcharts-tooltip { font-family: 'Inter', sans-serif !important; }
   .apexcharts-xaxis-label, .apexcharts-yaxis-label { fill: #8b8fa3 !important; }
@@ -402,7 +447,7 @@
 
   @media (max-width: 900px) {
     .summary-cards { grid-template-columns: repeat(2, 1fr); }
-    .chart-row, .feedback-columns { grid-template-columns: 1fr; }
+    .chart-row, .feedback-columns, .kiosk-grid { grid-template-columns: 1fr; }
     .face-row { flex-wrap: wrap; gap: 16px; }
   }
 </style>
@@ -446,7 +491,7 @@
   <div class="summary-cards">
     <div class="summary-card">
       <div class="label">Check-ins</div>
-      <div class="value" id="totalCheckins">2,847</div>
+      <div class="value" id="totalCheckins">8,234</div>
       <div class="change positive">+12.3% vs previous period</div>
     </div>
     <div class="summary-card">
@@ -514,7 +559,7 @@
   <div class="tabs">
     <button class="tab active" data-tab="morale">Morale Breakdown</button>
     <button class="tab" data-tab="spotcheck">Spotcheck</button>
-    <button class="tab" data-tab="feedback">Check-In Feedback</button>
+    <button class="tab" data-tab="feedback">Continuous Feedback</button>
   </div>
 
   <!-- MORALE TAB -->
@@ -531,6 +576,41 @@
       <div class="chart-card">
         <h3>Hourly Morale Patterns</h3>
         <div id="hourlyChart"></div>
+      </div>
+    </div>
+
+    <!-- Breakdown by Kiosk -->
+    <div class="chart-card">
+      <h3>Breakdown by Kiosk</h3>
+      <div class="kiosk-grid">
+        <div class="kiosk-card">
+          <div class="kiosk-name">Kiosk 1</div>
+          <div class="kiosk-location">Main Entrance</div>
+          <div class="kiosk-score" style="color:#38a169;">72</div>
+          <div class="kiosk-bar" style="background:#38a169;"></div>
+          <div class="kiosk-checkins"><strong>834</strong> check-ins</div>
+        </div>
+        <div class="kiosk-card">
+          <div class="kiosk-name">Kiosk 2</div>
+          <div class="kiosk-location">Canteen</div>
+          <div class="kiosk-score" style="color:#38a169;">65</div>
+          <div class="kiosk-bar" style="background:#38a169;"></div>
+          <div class="kiosk-checkins"><strong>721</strong> check-ins</div>
+        </div>
+        <div class="kiosk-card">
+          <div class="kiosk-name">Kiosk 3</div>
+          <div class="kiosk-location">East Wing</div>
+          <div class="kiosk-score" style="color:#ecc94b;">55</div>
+          <div class="kiosk-bar" style="background:#ecc94b;"></div>
+          <div class="kiosk-checkins"><strong>612</strong> check-ins</div>
+        </div>
+        <div class="kiosk-card">
+          <div class="kiosk-name">Kiosk 4</div>
+          <div class="kiosk-location">Loading Bay</div>
+          <div class="kiosk-score" style="color:#e53e3e;">48</div>
+          <div class="kiosk-bar" style="background:#e53e3e;"></div>
+          <div class="kiosk-checkins"><strong>445</strong> check-ins</div>
+        </div>
       </div>
     </div>
   </div>
@@ -577,6 +657,14 @@ function monthsAgo(n) {
   return d;
 }
 
+// ── Check-in counts per filter ──
+const checkinsByMonths = {
+  1: '2,847',
+  3: '8,234',
+  6: '15,891',
+  12: '31,456'
+};
+
 // ── Date Picker ──
 const dateFrom = document.getElementById('dateFrom');
 const dateTo = document.getElementById('dateTo');
@@ -595,6 +683,8 @@ document.querySelectorAll('.date-preset').forEach(btn => {
       dateFrom.value = fmtDate(monthsAgo(m));
     }
     dateTo.value = fmtDate(now);
+    // Update check-ins card
+    document.getElementById('totalCheckins').textContent = checkinsByMonths[m] || '8,234';
     updateWeeklyChart();
   });
 });
@@ -618,48 +708,116 @@ document.querySelectorAll('.tab').forEach(tab => {
   });
 });
 
-// ── Generate 52 weeks of morale data ──
-const storyArc = [
-  72, 70, 71, 68, 65, 58, 55, 60, 71, 69, 64, 45,
-  52, 58, 65, 68, 72, 74, 71, 69, 67, 63, 60, 57,
-  62, 66, 70, 73, 71, 68, 64, 59, 55, 50, 48, 53,
-  58, 63, 67, 70, 72, 74, 73, 71, 68, 65, 62, 60,
-  63, 66, 69, 62
-];
-
-const weeklyData = [];
-for (let i = 51; i >= 0; i--) {
-  const weekStart = weeksAgo(i);
-  const weekEnd = new Date(weekStart);
-  weekEnd.setDate(weekEnd.getDate() + 6);
-  const score = storyArc[51 - i] || 65;
-  weeklyData.push({
-    weekStart,
-    weekEnd,
-    label: fmtShort(weekStart),
-    score
-  });
-}
-
+// ── Generate morale data for N weeks with story arc ──
 const BASELINE = 68;
 
+function generateMoraleData(numWeeks) {
+  // Core story arc pattern (normalised to 0-1 range through the arc)
+  // green start -> yellow caution -> SHARP red drop -> second red -> recovery to green
+  const arcPoints = [
+    // Green opening
+    { pos: 0.00, val: 72 },
+    { pos: 0.05, val: 70 },
+    { pos: 0.10, val: 74 },
+    { pos: 0.15, val: 71 },
+    { pos: 0.20, val: 68 },
+    // Yellow caution period
+    { pos: 0.25, val: 63 },
+    { pos: 0.30, val: 59 },
+    { pos: 0.33, val: 57 },
+    { pos: 0.36, val: 60 },
+    // Brief recovery then SHARP drop to red
+    { pos: 0.40, val: 65 },
+    { pos: 0.43, val: 42 },  // Sharp drop!
+    { pos: 0.46, val: 48 },  // Second red week
+    // Recovery
+    { pos: 0.50, val: 53 },
+    { pos: 0.55, val: 58 },
+    { pos: 0.60, val: 63 },
+    { pos: 0.65, val: 67 },
+    { pos: 0.70, val: 70 },
+    { pos: 0.75, val: 73 },
+    // Second smaller dip
+    { pos: 0.80, val: 69 },
+    { pos: 0.83, val: 61 },
+    { pos: 0.86, val: 56 },
+    { pos: 0.88, val: 59 },
+    // Final recovery
+    { pos: 0.92, val: 64 },
+    { pos: 0.95, val: 68 },
+    { pos: 1.00, val: 62 }
+  ];
+
+  function interpolate(t) {
+    // Clamp
+    if (t <= 0) return arcPoints[0].val;
+    if (t >= 1) return arcPoints[arcPoints.length - 1].val;
+    // Find surrounding points
+    for (let i = 0; i < arcPoints.length - 1; i++) {
+      if (t >= arcPoints[i].pos && t <= arcPoints[i + 1].pos) {
+        const range = arcPoints[i + 1].pos - arcPoints[i].pos;
+        const frac = (t - arcPoints[i].pos) / range;
+        return Math.round(arcPoints[i].val + frac * (arcPoints[i + 1].val - arcPoints[i].val));
+      }
+    }
+    return 65;
+  }
+
+  const data = [];
+  for (let i = numWeeks - 1; i >= 0; i--) {
+    const weekStart = weeksAgo(i);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekEnd.getDate() + 6);
+    const t = (numWeeks - 1 - i) / (numWeeks - 1);
+    // Add small random jitter (+/- 2) for realism but keep the arc shape
+    const jitter = Math.round((Math.random() - 0.5) * 4);
+    let score = interpolate(t) + jitter;
+    score = Math.max(35, Math.min(80, score));
+    data.push({
+      weekStart,
+      weekEnd,
+      label: fmtShort(weekStart),
+      score
+    });
+  }
+  return data;
+}
+
 function getBarColor(score) {
-  if (score >= BASELINE * 0.9) return '#38a169';
-  if (score >= BASELINE * 0.8) return '#ecc94b';
-  return '#e53e3e';
+  if (score >= 61) return '#38a169';   // within 10% of baseline 68
+  if (score >= 54) return '#ecc94b';   // 10-20% below
+  return '#e53e3e';                     // more than 20% below
 }
 
 // ── Weekly Chart ──
 let weeklyChart;
+// Seed-based pseudo-random for consistent data per filter
+let currentWeeklyData = [];
 
-function updateWeeklyChart() {
+function getWeeksForFilter() {
+  const activePreset = document.querySelector('.date-preset.active');
+  if (activePreset) {
+    const m = parseInt(activePreset.dataset.months);
+    if (m === 1) return 4;
+    if (m === 3) return 13;
+    if (m === 6) return 26;
+    if (m === 12) return 52;
+  }
+  // Calculate from date inputs
   const from = new Date(dateFrom.value);
   const to = new Date(dateTo.value);
-  const filtered = weeklyData.filter(w => w.weekStart >= from && w.weekStart <= to);
+  const diffMs = to - from;
+  const weeks = Math.max(2, Math.round(diffMs / (7 * 24 * 60 * 60 * 1000)));
+  return Math.min(52, weeks);
+}
 
-  const categories = filtered.map(w => w.label);
-  const scores = filtered.map(w => w.score);
-  const colors = filtered.map(w => getBarColor(w.score));
+function updateWeeklyChart() {
+  const numWeeks = getWeeksForFilter();
+  currentWeeklyData = generateMoraleData(numWeeks);
+
+  const categories = currentWeeklyData.map(w => w.label);
+  const scores = currentWeeklyData.map(w => w.score);
+  const colors = currentWeeklyData.map(w => getBarColor(w.score));
 
   const opts = {
     series: [{
@@ -683,7 +841,7 @@ function updateWeeklyChart() {
     },
     colors: colors,
     dataLabels: {
-      enabled: true,
+      enabled: numWeeks <= 16,
       style: { fontSize: '11px', fontWeight: 600, colors: ['#fff'] },
       formatter: (val) => val
     },
@@ -694,14 +852,16 @@ function updateWeeklyChart() {
         strokeDashArray: 4,
         label: {
           text: 'Baseline: ' + BASELINE,
-          position: 'left',
+          position: 'right',
+          textAnchor: 'end',
+          offsetX: -10,
           style: { color: '#fff', background: '#6c5ce7', fontSize: '11px', padding: { left: 8, right: 8, top: 4, bottom: 4 } }
         }
       }]
     },
     xaxis: {
       categories,
-      labels: { style: { colors: '#8b8fa3', fontSize: '11px' }, rotate: -45, rotateAlways: filtered.length > 16 },
+      labels: { style: { colors: '#8b8fa3', fontSize: '11px' }, rotate: -45, rotateAlways: numWeeks > 16 },
       axisBorder: { color: 'rgba(255,255,255,0.08)' },
       axisTicks: { color: 'rgba(255,255,255,0.08)' }
     },
@@ -733,7 +893,8 @@ function updateWeeklyChart() {
 updateWeeklyChart();
 
 // ── Daily Chart ──
-const dailyScores = [67, 69, 68, 65, 64, 57, 62];
+// Monday yellow (58), Tue-Wed green, Thursday red (48), Friday green, Sat-Sun yellow
+const dailyScores = [58, 67, 69, 48, 66, 56, 57];
 const dailyColors = dailyScores.map(s => getBarColor(s));
 new ApexCharts(document.querySelector('#dailyChart'), {
   series: [{ name: 'Morale', data: dailyScores }],
@@ -746,7 +907,7 @@ new ApexCharts(document.querySelector('#dailyChart'), {
     labels: { style: { colors: '#8b8fa3', fontSize: '12px' } },
     axisBorder: { color: 'rgba(255,255,255,0.08)' }
   },
-  yaxis: { min: 40, max: 80, labels: { style: { colors: '#8b8fa3' } } },
+  yaxis: { min: 30, max: 80, labels: { style: { colors: '#8b8fa3' } } },
   grid: { borderColor: 'rgba(255,255,255,0.05)', strokeDashArray: 3 },
   legend: { show: false },
   tooltip: { theme: 'dark' },
@@ -754,8 +915,9 @@ new ApexCharts(document.querySelector('#dailyChart'), {
 }).render();
 
 // ── Hourly Chart ──
+// 1pm (index 7) red at 45, 5pm (index 11) red at 48, others in 60-72 range
 const hours = ['6am','7am','8am','9am','10am','11am','12pm','1pm','2pm','3pm','4pm','5pm','6pm'];
-const hourlyScores = [58, 62, 66, 69, 72, 74, 60, 63, 67, 70, 68, 65, 61];
+const hourlyScores = [60, 63, 67, 70, 72, 71, 64, 45, 66, 69, 67, 48, 62];
 const hourlyColors = hourlyScores.map(s => getBarColor(s));
 new ApexCharts(document.querySelector('#hourlyChart'), {
   series: [{ name: 'Morale', data: hourlyScores }],
@@ -768,7 +930,7 @@ new ApexCharts(document.querySelector('#hourlyChart'), {
     labels: { style: { colors: '#8b8fa3', fontSize: '11px' } },
     axisBorder: { color: 'rgba(255,255,255,0.08)' }
   },
-  yaxis: { min: 40, max: 85, labels: { style: { colors: '#8b8fa3' } } },
+  yaxis: { min: 30, max: 85, labels: { style: { colors: '#8b8fa3' } } },
   grid: { borderColor: 'rgba(255,255,255,0.05)', strokeDashArray: 3 },
   legend: { show: false },
   tooltip: { theme: 'dark' },
