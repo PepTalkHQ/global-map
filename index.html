@@ -12,6 +12,8 @@
         #map { height: calc(100vh - 64px); width: 100%; }
 
         .leaflet-container { background: #fff; }
+        .inverted-tiles { filter: invert(1) grayscale(1) contrast(1.2); }
+        .inverted-labels { filter: invert(1) grayscale(1); mix-blend-mode: multiply; }
 
         /* Header bar */
         .header {
@@ -143,13 +145,18 @@
 <script>
 const map = L.map('map', { zoomControl: true }).setView([40, -20], 3);
 
-L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_toner_background/{z}/{x}/{y}{r}.png', {
+// Light base with inverted colours to get black land / white water
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
     attribution: '',
-    maxZoom: 18
-}).addTo(map);
-L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_toner_labels/{z}/{x}/{y}{r}.png', {
     maxZoom: 18,
-    pane: 'overlayPane'
+    subdomains: 'abcd',
+    className: 'inverted-tiles'
+}).addTo(map);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', {
+    maxZoom: 18,
+    subdomains: 'abcd',
+    pane: 'overlayPane',
+    className: 'inverted-labels'
 }).addTo(map);
 
 const regionColors = {
