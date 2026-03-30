@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PepTalk - Project Atlas Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #161822;
+    --card: #1e2030;
+    --header: #0f1117;
+    --border: rgba(255,255,255,0.08);
+    --text: #e2e4eb;
+    --text-muted: #8b8fa3;
+    --text-dim: #5c6078;
+    --accent: #6c5ce7;
+    --green: #38a169;
+    --yellow: #ecc94b;
+    --red: #e53e3e;
+    --orange: #ed8936;
+    --light-green: #68d391;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4 { font-family: 'Lexend', sans-serif; }
+
+  /* Header */
+  .header {
+    background: var(--header);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .header-left { display: flex; align-items: center; gap: 16px; }
+  .header-left .project-name {
+    font-family: 'Lexend', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: #fff;
+  }
+  .header-left .customer-name {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  .header-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Lexend', sans-serif;
+    font-weight: 700;
+    font-size: 22px;
+    color: #fff;
+    letter-spacing: -0.5px;
+  }
+  .header-logo svg { flex-shrink: 0; }
+
+  /* Main content */
+  .main { max-width: 1280px; margin: 0 auto; padding: 24px 32px 48px; }
+
+  /* Date picker */
+  .date-picker-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .date-preset {
+    padding: 7px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .date-preset:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+  .date-preset.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    font-weight: 500;
+  }
+  .date-inputs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+  }
+  .date-inputs input[type="date"] {
+    padding: 7px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    outline: none;
+  }
+  .date-inputs input[type="date"]:focus { border-color: var(--accent); }
+  .date-inputs span { color: var(--text-dim); font-size: 13px; }
+
+  /* Summary cards */
+  .summary-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .summary-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+  }
+  .summary-card .label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  .summary-card .value {
+    font-family: 'Lexend', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .summary-card .change {
+    font-size: 12px;
+    margin-top: 6px;
+    font-weight: 500;
+  }
+  .change.positive { color: var(--green); }
+  .change.negative { color: var(--red); }
+  .change.neutral-change { color: var(--text-muted); }
+
+  /* Face distribution */
+  .face-row {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+  }
+  .face-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    min-width: 100px;
+  }
+  .face-circle {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+  }
+  .face-item .pct {
+    font-family: 'Lexend', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .face-item .face-label {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .face-item .face-count {
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 24px;
+    border-bottom: 2px solid var(--border);
+  }
+  .tab {
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active {
+    color: #fff;
+    border-bottom-color: var(--accent);
+  }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Chart containers */
+  .chart-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .chart-card h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 16px;
+  }
+  .chart-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  /* Spotcheck cards */
+  .spotcheck-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .spotcheck-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .spotcheck-type {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 6px;
+  }
+  .spotcheck-type.safety { background: rgba(229,62,62,0.15); color: #fc8181; }
+  .spotcheck-type.operations { background: rgba(236,201,75,0.15); color: #ecc94b; }
+  .spotcheck-type.engagement { background: rgba(56,161,105,0.15); color: #68d391; }
+  .spotcheck-title {
+    font-family: 'Lexend', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+  .spotcheck-question {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    font-style: italic;
+  }
+  .spotcheck-meta {
+    display: flex;
+    gap: 20px;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 20px;
+  }
+  .spotcheck-meta span { display: flex; align-items: center; gap: 4px; }
+  .spotcheck-bar-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    gap: 12px;
+  }
+  .spotcheck-bar-label {
+    width: 220px;
+    font-size: 13px;
+    color: var(--text);
+    flex-shrink: 0;
+  }
+  .spotcheck-bar-track {
+    flex: 1;
+    height: 28px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+  }
+  .spotcheck-bar-fill {
+    height: 100%;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    transition: width 0.6s ease;
+  }
+  .spotcheck-bar-pct {
+    width: 44px;
+    text-align: right;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    flex-shrink: 0;
+  }
+
+  /* Check-in feedback */
+  .feedback-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .feedback-col {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+  }
+  .feedback-col h3 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .feedback-col h3 .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .feedback-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 14px;
+    gap: 12px;
+  }
+  .feedback-item .fi-label {
+    width: 180px;
+    font-size: 13px;
+    color: var(--text);
+    flex-shrink: 0;
+  }
+  .feedback-item .fi-bar {
+    flex: 1;
+    height: 24px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .feedback-item .fi-fill {
+    height: 100%;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    padding-left: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #fff;
+  }
+  .feedback-item .fi-meta {
+    width: 110px;
+    text-align: right;
+    font-size: 12px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+
+  /* Apex chart overrides */
+  .apexcharts-tooltip { font-family: 'Inter', sans-serif !important; }
+  .apexcharts-xaxis-label, .apexcharts-yaxis-label { fill: #8b8fa3 !important; }
+  .apexcharts-gridline { stroke: rgba(255,255,255,0.05) !important; }
+  .apexcharts-legend-text { color: #8b8fa3 !important; font-family: 'Inter', sans-serif !important; }
+
+  @media (max-width: 900px) {
+    .summary-cards { grid-template-columns: repeat(2, 1fr); }
+    .chart-row, .feedback-columns { grid-template-columns: 1fr; }
+    .face-row { flex-wrap: wrap; gap: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-left">
+    <div>
+      <div class="project-name">Project Atlas</div>
+      <div class="customer-name">Atlas Construction</div>
+    </div>
+  </div>
+  <div class="header-logo">
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+      <rect width="36" height="36" rx="8" fill="#6c5ce7"/>
+      <path d="M10 22V14c0-1.1.9-2 2-2h3c1.1 0 2 .9 2 2v2c0 1.1-.9 2-2 2h-3m0 0v4m10-8v8m0-8c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3z" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    PepTalk
+  </div>
+</div>
+
+<!-- Main -->
+<div class="main">
+
+  <!-- Date picker -->
+  <div class="date-picker-row">
+    <button class="date-preset" data-months="1">This Month</button>
+    <button class="date-preset active" data-months="3">Last 3 Months</button>
+    <button class="date-preset" data-months="6">Last 6 Months</button>
+    <button class="date-preset" data-months="12">Last 12 Months</button>
+    <div class="date-inputs">
+      <input type="date" id="dateFrom">
+      <span>to</span>
+      <input type="date" id="dateTo">
+    </div>
+  </div>
+
+  <!-- Summary cards -->
+  <div class="summary-cards">
+    <div class="summary-card">
+      <div class="label">Check-ins</div>
+      <div class="value" id="totalCheckins">2,847</div>
+      <div class="change positive">+12.3% vs previous period</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">Morale Score</div>
+      <div class="value" id="moraleScore">62</div>
+      <div class="change negative">-4.1% vs previous period</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">Baseline</div>
+      <div class="value">68</div>
+      <div class="change neutral-change">Set 12 months ago</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">Benchmark</div>
+      <div class="value">65</div>
+      <div class="change neutral-change">Industry: Construction</div>
+    </div>
+  </div>
+
+  <!-- Face distribution -->
+  <div class="face-row">
+    <div class="face-item">
+      <div class="face-circle" style="background:rgba(229,62,62,0.15);">
+        <svg width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="#e53e3e"/><circle cx="12" cy="14" r="2" fill="#fff"/><circle cx="24" cy="14" r="2" fill="#fff"/><path d="M11 25c2-3 5-4 7-4s5 1 7 4" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/><line x1="10" y1="10" x2="14" y2="12" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/><line x1="26" y1="10" x2="22" y2="12" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <div class="pct">18%</div>
+      <div class="face-label" style="color:#e53e3e;">Red</div>
+      <div class="face-count">~512 check-ins</div>
+    </div>
+    <div class="face-item">
+      <div class="face-circle" style="background:rgba(237,137,54,0.15);">
+        <svg width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="#ed8936"/><circle cx="12" cy="15" r="2" fill="#fff"/><circle cx="24" cy="15" r="2" fill="#fff"/><path d="M12 24c1.5-2 3.5-3 6-3s4.5 1 6 3" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      </div>
+      <div class="pct">8%</div>
+      <div class="face-label" style="color:#ed8936;">Orange</div>
+      <div class="face-count">~228 check-ins</div>
+    </div>
+    <div class="face-item">
+      <div class="face-circle" style="background:rgba(236,201,75,0.15);">
+        <svg width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="#ecc94b"/><circle cx="12" cy="15" r="2" fill="#fff"/><circle cx="24" cy="15" r="2" fill="#fff"/><line x1="12" y1="23" x2="24" y2="23" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+      <div class="pct">12%</div>
+      <div class="face-label" style="color:#ecc94b;">Yellow</div>
+      <div class="face-count">~342 check-ins</div>
+    </div>
+    <div class="face-item">
+      <div class="face-circle" style="background:rgba(104,211,145,0.15);">
+        <svg width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="#68d391"/><circle cx="12" cy="15" r="2" fill="#fff"/><circle cx="24" cy="15" r="2" fill="#fff"/><path d="M12 22c1.5 2 3.5 3 6 3s4.5-1 6-3" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      </div>
+      <div class="pct">24%</div>
+      <div class="face-label" style="color:#68d391;">Light Green</div>
+      <div class="face-count">~683 check-ins</div>
+    </div>
+    <div class="face-item">
+      <div class="face-circle" style="background:rgba(56,161,105,0.15);">
+        <svg width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="#38a169"/><circle cx="12" cy="15" r="2" fill="#fff"/><circle cx="24" cy="15" r="2" fill="#fff"/><path d="M10 21c2 4 5 5 8 5s6-1 8-5" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      </div>
+      <div class="pct">38%</div>
+      <div class="face-label" style="color:#38a169;">Dark Green</div>
+      <div class="face-count">~1,082 check-ins</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" data-tab="morale">Morale Breakdown</button>
+    <button class="tab" data-tab="spotcheck">Spotcheck</button>
+    <button class="tab" data-tab="feedback">Check-In Feedback</button>
+  </div>
+
+  <!-- MORALE TAB -->
+  <div class="tab-content active" id="tab-morale">
+    <div class="chart-card">
+      <h3>Weekly Morale Trend</h3>
+      <div id="weeklyChart"></div>
+    </div>
+    <div class="chart-row">
+      <div class="chart-card">
+        <h3>Daily Morale Patterns</h3>
+        <div id="dailyChart"></div>
+      </div>
+      <div class="chart-card">
+        <h3>Hourly Morale Patterns</h3>
+        <div id="hourlyChart"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SPOTCHECK TAB -->
+  <div class="tab-content" id="tab-spotcheck">
+    <div id="spotcheck-cards"></div>
+  </div>
+
+  <!-- FEEDBACK TAB -->
+  <div class="tab-content" id="tab-feedback">
+    <div class="feedback-columns">
+      <div class="feedback-col">
+        <h3><span class="dot" style="background:#e53e3e;"></span> What could be better on the project?</h3>
+        <div id="feedback-negative"></div>
+      </div>
+      <div class="feedback-col">
+        <h3><span class="dot" style="background:#38a169;"></span> Have you seen something on another site we should try here?</h3>
+        <div id="feedback-positive"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── Helpers ──
+const now = new Date();
+function fmtDate(d) {
+  return d.toISOString().split('T')[0];
+}
+function fmtShort(d) {
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return months[d.getMonth()] + ' ' + d.getDate();
+}
+function weeksAgo(n) {
+  const d = new Date(now);
+  d.setDate(d.getDate() - n * 7);
+  return d;
+}
+function monthsAgo(n) {
+  const d = new Date(now);
+  d.setMonth(d.getMonth() - n);
+  return d;
+}
+
+// ── Date Picker ──
+const dateFrom = document.getElementById('dateFrom');
+const dateTo = document.getElementById('dateTo');
+dateTo.value = fmtDate(now);
+dateFrom.value = fmtDate(monthsAgo(3));
+
+document.querySelectorAll('.date-preset').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.date-preset').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    const m = parseInt(this.dataset.months);
+    if (m === 1) {
+      const start = new Date(now.getFullYear(), now.getMonth(), 1);
+      dateFrom.value = fmtDate(start);
+    } else {
+      dateFrom.value = fmtDate(monthsAgo(m));
+    }
+    dateTo.value = fmtDate(now);
+    updateWeeklyChart();
+  });
+});
+
+dateFrom.addEventListener('change', () => {
+  document.querySelectorAll('.date-preset').forEach(b => b.classList.remove('active'));
+  updateWeeklyChart();
+});
+dateTo.addEventListener('change', () => {
+  document.querySelectorAll('.date-preset').forEach(b => b.classList.remove('active'));
+  updateWeeklyChart();
+});
+
+// ── Tabs ──
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    this.classList.add('active');
+    document.getElementById('tab-' + this.dataset.tab).classList.add('active');
+  });
+});
+
+// ── Generate 52 weeks of morale data ──
+const storyArc = [
+  72, 70, 71, 68, 65, 58, 55, 60, 71, 69, 64, 45,
+  52, 58, 65, 68, 72, 74, 71, 69, 67, 63, 60, 57,
+  62, 66, 70, 73, 71, 68, 64, 59, 55, 50, 48, 53,
+  58, 63, 67, 70, 72, 74, 73, 71, 68, 65, 62, 60,
+  63, 66, 69, 62
+];
+
+const weeklyData = [];
+for (let i = 51; i >= 0; i--) {
+  const weekStart = weeksAgo(i);
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekEnd.getDate() + 6);
+  const score = storyArc[51 - i] || 65;
+  weeklyData.push({
+    weekStart,
+    weekEnd,
+    label: fmtShort(weekStart),
+    score
+  });
+}
+
+const BASELINE = 68;
+
+function getBarColor(score) {
+  if (score >= BASELINE * 0.9) return '#38a169';
+  if (score >= BASELINE * 0.8) return '#ecc94b';
+  return '#e53e3e';
+}
+
+// ── Weekly Chart ──
+let weeklyChart;
+
+function updateWeeklyChart() {
+  const from = new Date(dateFrom.value);
+  const to = new Date(dateTo.value);
+  const filtered = weeklyData.filter(w => w.weekStart >= from && w.weekStart <= to);
+
+  const categories = filtered.map(w => w.label);
+  const scores = filtered.map(w => w.score);
+  const colors = filtered.map(w => getBarColor(w.score));
+
+  const opts = {
+    series: [{
+      name: 'Morale',
+      data: scores
+    }],
+    chart: {
+      type: 'bar',
+      height: 360,
+      background: 'transparent',
+      toolbar: { show: false },
+      fontFamily: 'Inter, sans-serif'
+    },
+    plotOptions: {
+      bar: {
+        borderRadius: 4,
+        columnWidth: '60%',
+        distributed: true,
+        dataLabels: { position: 'center' }
+      }
+    },
+    colors: colors,
+    dataLabels: {
+      enabled: true,
+      style: { fontSize: '11px', fontWeight: 600, colors: ['#fff'] },
+      formatter: (val) => val
+    },
+    annotations: {
+      yaxis: [{
+        y: BASELINE,
+        borderColor: '#a78bfa',
+        strokeDashArray: 4,
+        label: {
+          text: 'Baseline: ' + BASELINE,
+          position: 'left',
+          style: { color: '#fff', background: '#6c5ce7', fontSize: '11px', padding: { left: 8, right: 8, top: 4, bottom: 4 } }
+        }
+      }]
+    },
+    xaxis: {
+      categories,
+      labels: { style: { colors: '#8b8fa3', fontSize: '11px' }, rotate: -45, rotateAlways: filtered.length > 16 },
+      axisBorder: { color: 'rgba(255,255,255,0.08)' },
+      axisTicks: { color: 'rgba(255,255,255,0.08)' }
+    },
+    yaxis: {
+      min: 30,
+      max: 85,
+      labels: { style: { colors: '#8b8fa3' } }
+    },
+    grid: { borderColor: 'rgba(255,255,255,0.05)', strokeDashArray: 3 },
+    legend: {
+      show: true,
+      customLegendItems: ['Above Baseline', 'Caution Zone', 'Warning Zone'],
+      markers: { fillColors: ['#38a169', '#ecc94b', '#e53e3e'] },
+      labels: { colors: '#8b8fa3' },
+      position: 'top',
+      horizontalAlign: 'right'
+    },
+    tooltip: {
+      theme: 'dark',
+      y: { formatter: v => 'Score: ' + v }
+    }
+  };
+
+  if (weeklyChart) weeklyChart.destroy();
+  weeklyChart = new ApexCharts(document.querySelector('#weeklyChart'), opts);
+  weeklyChart.render();
+}
+
+updateWeeklyChart();
+
+// ── Daily Chart ──
+const dailyScores = [67, 69, 68, 65, 64, 57, 62];
+const dailyColors = dailyScores.map(s => getBarColor(s));
+new ApexCharts(document.querySelector('#dailyChart'), {
+  series: [{ name: 'Morale', data: dailyScores }],
+  chart: { type: 'bar', height: 280, background: 'transparent', toolbar: { show: false }, fontFamily: 'Inter' },
+  plotOptions: { bar: { borderRadius: 4, columnWidth: '55%', distributed: true, dataLabels: { position: 'center' } } },
+  colors: dailyColors,
+  dataLabels: { enabled: true, style: { fontSize: '11px', fontWeight: 600, colors: ['#fff'] } },
+  xaxis: {
+    categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    labels: { style: { colors: '#8b8fa3', fontSize: '12px' } },
+    axisBorder: { color: 'rgba(255,255,255,0.08)' }
+  },
+  yaxis: { min: 40, max: 80, labels: { style: { colors: '#8b8fa3' } } },
+  grid: { borderColor: 'rgba(255,255,255,0.05)', strokeDashArray: 3 },
+  legend: { show: false },
+  tooltip: { theme: 'dark' },
+  annotations: { yaxis: [{ y: BASELINE, borderColor: '#a78bfa', strokeDashArray: 4 }] }
+}).render();
+
+// ── Hourly Chart ──
+const hours = ['6am','7am','8am','9am','10am','11am','12pm','1pm','2pm','3pm','4pm','5pm','6pm'];
+const hourlyScores = [58, 62, 66, 69, 72, 74, 60, 63, 67, 70, 68, 65, 61];
+const hourlyColors = hourlyScores.map(s => getBarColor(s));
+new ApexCharts(document.querySelector('#hourlyChart'), {
+  series: [{ name: 'Morale', data: hourlyScores }],
+  chart: { type: 'bar', height: 280, background: 'transparent', toolbar: { show: false }, fontFamily: 'Inter' },
+  plotOptions: { bar: { borderRadius: 4, columnWidth: '55%', distributed: true, dataLabels: { position: 'center' } } },
+  colors: hourlyColors,
+  dataLabels: { enabled: true, style: { fontSize: '10px', fontWeight: 600, colors: ['#fff'] } },
+  xaxis: {
+    categories: hours,
+    labels: { style: { colors: '#8b8fa3', fontSize: '11px' } },
+    axisBorder: { color: 'rgba(255,255,255,0.08)' }
+  },
+  yaxis: { min: 40, max: 85, labels: { style: { colors: '#8b8fa3' } } },
+  grid: { borderColor: 'rgba(255,255,255,0.05)', strokeDashArray: 3 },
+  legend: { show: false },
+  tooltip: { theme: 'dark' },
+  annotations: { yaxis: [{ y: BASELINE, borderColor: '#a78bfa', strokeDashArray: 4 }] }
+}).render();
+
+// ── Spotcheck Tab ──
+const spotchecks = [
+  {
+    type: 'safety', typeName: 'Safety Spotcheck',
+    title: 'Working from Heights Awareness',
+    question: 'What would help you feel safer when working at height?',
+    weeksAgo: 8, responses: 187,
+    answers: [
+      { label: 'Better harness equipment', pct: 34 },
+      { label: 'More frequent inspections', pct: 28 },
+      { label: 'Improved training', pct: 22 },
+      { label: 'Buddy system', pct: 16 }
+    ],
+    color: '#e53e3e'
+  },
+  {
+    type: 'operations', typeName: 'Operations Spotcheck',
+    title: 'Shift Handover Efficiency',
+    question: 'What slows down shift handovers the most?',
+    weeksAgo: 5, responses: 156,
+    answers: [
+      { label: 'Incomplete paperwork', pct: 38 },
+      { label: 'Missing tools/equipment', pct: 25 },
+      { label: 'Poor communication', pct: 21 },
+      { label: 'Unclear task priorities', pct: 16 }
+    ],
+    color: '#ecc94b'
+  },
+  {
+    type: 'engagement', typeName: 'Engagement Spotcheck',
+    title: 'Team Recognition',
+    question: 'How can leadership better recognise good work on site?',
+    weeksAgo: 2, responses: 203,
+    answers: [
+      { label: 'Public acknowledgment at briefings', pct: 31 },
+      { label: 'Small rewards/vouchers', pct: 27 },
+      { label: 'Personal thank you from supervisor', pct: 24 },
+      { label: 'Team celebration events', pct: 18 }
+    ],
+    color: '#68d391'
+  }
+];
+
+const spotContainer = document.getElementById('spotcheck-cards');
+spotchecks.forEach(sc => {
+  const deployed = weeksAgo(sc.weeksAgo);
+  const deployedStr = deployed.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  let html = `
+    <div class="spotcheck-card">
+      <div class="spotcheck-header">
+        <span class="spotcheck-type ${sc.type}">${sc.typeName}</span>
+      </div>
+      <div class="spotcheck-title">${sc.title}</div>
+      <div class="spotcheck-question">"${sc.question}"</div>
+      <div class="spotcheck-meta">
+        <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Deployed: ${deployedStr}</span>
+        <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> ${sc.responses} responses</span>
+      </div>`;
+  sc.answers.forEach(a => {
+    html += `
+      <div class="spotcheck-bar-row">
+        <div class="spotcheck-bar-label">${a.label}</div>
+        <div class="spotcheck-bar-track">
+          <div class="spotcheck-bar-fill" style="width:${a.pct}%;background:${sc.color};">${a.pct}%</div>
+        </div>
+        <div class="spotcheck-bar-pct">${a.pct}%</div>
+      </div>`;
+  });
+  html += '</div>';
+  spotContainer.innerHTML += html;
+});
+
+// ── Feedback Tab ──
+const negItems = [
+  { label: 'Site Traffic', pct: 28, count: 82 },
+  { label: 'Welfare Facilities', pct: 19, count: 56 },
+  { label: 'Communication', pct: 16, count: 47 },
+  { label: 'Recognition', pct: 14, count: 41 },
+  { label: 'Overtime', pct: 12, count: 35 },
+  { label: 'Toolbox Talks', pct: 11, count: 32 }
+];
+const posItems = [
+  { label: 'Better tool setup', pct: 24, count: 51 },
+  { label: 'Safety briefing format', pct: 21, count: 45 },
+  { label: 'Small but effective change', pct: 18, count: 38 },
+  { label: 'Break area improvements', pct: 17, count: 36 },
+  { label: 'More efficient process', pct: 12, count: 25 },
+  { label: 'Team collaboration idea', pct: 8, count: 17 }
+];
+
+function renderFeedback(items, containerId, color) {
+  const c = document.getElementById(containerId);
+  items.forEach(item => {
+    c.innerHTML += `
+      <div class="feedback-item">
+        <div class="fi-label">${item.label}</div>
+        <div class="fi-bar"><div class="fi-fill" style="width:${item.pct * 2.5}%;background:${color};">${item.pct}%</div></div>
+        <div class="fi-meta">${item.count} responses</div>
+      </div>`;
+  });
+}
+renderFeedback(negItems, 'feedback-negative', '#e53e3e');
+renderFeedback(posItems, 'feedback-positive', '#38a169');
+</script>
+</body>
+</html>
