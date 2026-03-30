@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PepTalk - Project Atlas Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -26,14 +26,13 @@
   }
 
   body {
-    font-family: 'Inter', -apple-system, sans-serif;
+    font-family: 'Lexend', sans-serif;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
   }
 
-  h1, h2, h3, h4 { font-family: 'Lexend', sans-serif; }
 
   /* Header */
   .header {
@@ -85,7 +84,7 @@
     border: 1px solid var(--border);
     background: transparent;
     color: var(--text-muted);
-    font-family: 'Inter', sans-serif;
+    font-family: 'Lexend', sans-serif;
     font-size: 13px;
     cursor: pointer;
     transition: all 0.2s;
@@ -109,7 +108,7 @@
     border: 1px solid var(--border);
     background: var(--card);
     color: var(--text);
-    font-family: 'Inter', sans-serif;
+    font-family: 'Lexend', sans-serif;
     font-size: 13px;
     outline: none;
   }
@@ -210,7 +209,7 @@
     border-bottom: 2px solid transparent;
     margin-bottom: -2px;
     transition: all 0.2s;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Lexend', sans-serif;
     background: none;
     border-top: none;
     border-left: none;
@@ -440,10 +439,10 @@
   }
 
   /* Apex chart overrides */
-  .apexcharts-tooltip { font-family: 'Inter', sans-serif !important; }
+  .apexcharts-tooltip { font-family: 'Lexend', sans-serif !important; }
   .apexcharts-xaxis-label, .apexcharts-yaxis-label { fill: #8b8fa3 !important; }
   .apexcharts-gridline { stroke: rgba(255,255,255,0.05) !important; }
-  .apexcharts-legend-text { color: #8b8fa3 !important; font-family: 'Inter', sans-serif !important; }
+  .apexcharts-legend-text { color: #8b8fa3 !important; font-family: 'Lexend', sans-serif !important; }
 
   @media (max-width: 900px) {
     .summary-cards { grid-template-columns: repeat(2, 1fr); }
@@ -496,7 +495,7 @@
     </div>
     <div class="summary-card">
       <div class="label">Morale Score</div>
-      <div class="value" id="moraleScore">62</div>
+      <div class="value" id="moraleScore">64</div>
       <div class="change negative">-4.1% vs previous period</div>
     </div>
     <div class="summary-card">
@@ -517,41 +516,41 @@
       <div class="face-circle" style="background:rgba(229,62,62,0.15);">
         <svg width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="#e53e3e"/><circle cx="12" cy="14" r="2" fill="#fff"/><circle cx="24" cy="14" r="2" fill="#fff"/><path d="M11 25c2-3 5-4 7-4s5 1 7 4" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/><line x1="10" y1="10" x2="14" y2="12" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/><line x1="26" y1="10" x2="22" y2="12" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg>
       </div>
-      <div class="pct">18%</div>
+      <div class="pct face-pct">15%</div>
       <div class="face-label" style="color:#e53e3e;">Red</div>
-      <div class="face-count">~512 check-ins</div>
+      <div class="face-count face-count-val">~1,235 check-ins</div>
     </div>
     <div class="face-item">
       <div class="face-circle" style="background:rgba(237,137,54,0.15);">
         <svg width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="#ed8936"/><circle cx="12" cy="15" r="2" fill="#fff"/><circle cx="24" cy="15" r="2" fill="#fff"/><path d="M12 24c1.5-2 3.5-3 6-3s4.5 1 6 3" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
       </div>
-      <div class="pct">8%</div>
+      <div class="pct face-pct">7%</div>
       <div class="face-label" style="color:#ed8936;">Orange</div>
-      <div class="face-count">~228 check-ins</div>
+      <div class="face-count face-count-val">~576 check-ins</div>
     </div>
     <div class="face-item">
       <div class="face-circle" style="background:rgba(236,201,75,0.15);">
         <svg width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="#ecc94b"/><circle cx="12" cy="15" r="2" fill="#fff"/><circle cx="24" cy="15" r="2" fill="#fff"/><line x1="12" y1="23" x2="24" y2="23" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
       </div>
-      <div class="pct">12%</div>
+      <div class="pct face-pct">13%</div>
       <div class="face-label" style="color:#ecc94b;">Yellow</div>
-      <div class="face-count">~342 check-ins</div>
+      <div class="face-count face-count-val">~1,070 check-ins</div>
     </div>
     <div class="face-item">
       <div class="face-circle" style="background:rgba(104,211,145,0.15);">
         <svg width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="#68d391"/><circle cx="12" cy="15" r="2" fill="#fff"/><circle cx="24" cy="15" r="2" fill="#fff"/><path d="M12 22c1.5 2 3.5 3 6 3s4.5-1 6-3" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
       </div>
-      <div class="pct">24%</div>
+      <div class="pct face-pct">27%</div>
       <div class="face-label" style="color:#68d391;">Light Green</div>
-      <div class="face-count">~683 check-ins</div>
+      <div class="face-count face-count-val">~2,223 check-ins</div>
     </div>
     <div class="face-item">
       <div class="face-circle" style="background:rgba(56,161,105,0.15);">
         <svg width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="#38a169"/><circle cx="12" cy="15" r="2" fill="#fff"/><circle cx="24" cy="15" r="2" fill="#fff"/><path d="M10 21c2 4 5 5 8 5s6-1 8-5" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
       </div>
-      <div class="pct">38%</div>
+      <div class="pct face-pct">38%</div>
       <div class="face-label" style="color:#38a169;">Dark Green</div>
-      <div class="face-count">~1,082 check-ins</div>
+      <div class="face-count face-count-val">~3,129 check-ins</div>
     </div>
   </div>
 
@@ -665,6 +664,28 @@ const checkinsByMonths = {
   12: '31,456'
 };
 
+// ── Face data per filter ──
+const faceDataByMonths = {
+  1:  { total: 2847,  morale: 62, pcts: [18, 8, 12, 24, 38] },
+  3:  { total: 8234,  morale: 64, pcts: [15, 7, 13, 27, 38] },
+  6:  { total: 15891, morale: 63, pcts: [16, 8, 12, 25, 39] },
+  12: { total: 31456, morale: 61, pcts: [19, 9, 13, 23, 36] }
+};
+
+function updateFaces(months) {
+  const data = faceDataByMonths[months];
+  if (!data) return;
+  const pctEls = document.querySelectorAll('.face-pct');
+  const countEls = document.querySelectorAll('.face-count-val');
+  data.pcts.forEach((p, i) => {
+    const count = Math.round(data.total * p / 100);
+    pctEls[i].textContent = p + '%';
+    countEls[i].textContent = '~' + count.toLocaleString() + ' check-ins';
+  });
+  // Update morale score summary card
+  document.getElementById('moraleScore').textContent = data.morale;
+}
+
 // ── Date Picker ──
 const dateFrom = document.getElementById('dateFrom');
 const dateTo = document.getElementById('dateTo');
@@ -685,6 +706,7 @@ document.querySelectorAll('.date-preset').forEach(btn => {
     dateTo.value = fmtDate(now);
     // Update check-ins card
     document.getElementById('totalCheckins').textContent = checkinsByMonths[m] || '8,234';
+    updateFaces(m);
     updateWeeklyChart();
   });
 });
@@ -829,7 +851,7 @@ function updateWeeklyChart() {
       height: 360,
       background: 'transparent',
       toolbar: { show: false },
-      fontFamily: 'Inter, sans-serif'
+      fontFamily: 'Lexend, sans-serif'
     },
     plotOptions: {
       bar: {
@@ -898,7 +920,7 @@ const dailyScores = [58, 67, 69, 48, 66, 56, 57];
 const dailyColors = dailyScores.map(s => getBarColor(s));
 new ApexCharts(document.querySelector('#dailyChart'), {
   series: [{ name: 'Morale', data: dailyScores }],
-  chart: { type: 'bar', height: 280, background: 'transparent', toolbar: { show: false }, fontFamily: 'Inter' },
+  chart: { type: 'bar', height: 280, background: 'transparent', toolbar: { show: false }, fontFamily: 'Lexend' },
   plotOptions: { bar: { borderRadius: 4, columnWidth: '55%', distributed: true, dataLabels: { position: 'center' } } },
   colors: dailyColors,
   dataLabels: { enabled: true, style: { fontSize: '11px', fontWeight: 600, colors: ['#fff'] } },
@@ -921,7 +943,7 @@ const hourlyScores = [60, 63, 67, 70, 72, 71, 64, 45, 66, 69, 67, 48, 62];
 const hourlyColors = hourlyScores.map(s => getBarColor(s));
 new ApexCharts(document.querySelector('#hourlyChart'), {
   series: [{ name: 'Morale', data: hourlyScores }],
-  chart: { type: 'bar', height: 280, background: 'transparent', toolbar: { show: false }, fontFamily: 'Inter' },
+  chart: { type: 'bar', height: 280, background: 'transparent', toolbar: { show: false }, fontFamily: 'Lexend' },
   plotOptions: { bar: { borderRadius: 4, columnWidth: '55%', distributed: true, dataLabels: { position: 'center' } } },
   colors: hourlyColors,
   dataLabels: { enabled: true, style: { fontSize: '10px', fontWeight: 600, colors: ['#fff'] } },
