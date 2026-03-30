@@ -449,6 +449,135 @@
     .chart-row, .feedback-columns, .kiosk-grid { grid-template-columns: 1fr; }
     .face-row { flex-wrap: wrap; gap: 16px; }
   }
+
+  /* Tour button */
+  .tour-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 20px;
+    border-radius: 999px;
+    background: #22c55e;
+    color: #fff;
+    font-family: 'Lexend', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .tour-btn:hover { background: #16a34a; }
+  .tour-btn svg { flex-shrink: 0; }
+
+  /* Tour overlay */
+  .tour-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 10000;
+    transition: opacity 0.3s;
+  }
+
+  /* Tour highlighted element */
+  .tour-highlight {
+    position: relative !important;
+    z-index: 10001 !important;
+    box-shadow: 0 0 0 4px #fff, 0 0 24px 8px rgba(255,255,255,0.25) !important;
+    border-radius: 12px;
+  }
+
+  /* Tour tooltip */
+  .tour-tooltip {
+    position: absolute;
+    z-index: 10002;
+    background: #1e2030;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 12px;
+    padding: 20px;
+    max-width: 360px;
+    width: 360px;
+    font-family: 'Lexend', sans-serif;
+    color: #e2e4eb;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  }
+  .tour-tooltip-arrow {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: #1e2030;
+    border: 1px solid rgba(255,255,255,0.15);
+    transform: rotate(45deg);
+  }
+  .tour-tooltip-arrow.arrow-top {
+    top: -7px;
+    left: 24px;
+    border-right: none;
+    border-bottom: none;
+  }
+  .tour-tooltip-arrow.arrow-bottom {
+    bottom: -7px;
+    left: 24px;
+    border-left: none;
+    border-top: none;
+  }
+  .tour-step-counter {
+    font-size: 12px;
+    color: #8b8fa3;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  .tour-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 8px;
+  }
+  .tour-desc {
+    font-size: 13px;
+    color: #b0b3c6;
+    line-height: 1.55;
+    margin-bottom: 20px;
+  }
+  .tour-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .tour-skip {
+    font-size: 12px;
+    color: #8b8fa3;
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-family: 'Lexend', sans-serif;
+    transition: color 0.2s;
+  }
+  .tour-skip:hover { color: #e2e4eb; }
+  .tour-nav {
+    display: flex;
+    gap: 8px;
+  }
+  .tour-nav-btn {
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-family: 'Lexend', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: background 0.2s, opacity 0.2s;
+  }
+  .tour-nav-btn.prev {
+    background: rgba(255,255,255,0.1);
+    color: #e2e4eb;
+  }
+  .tour-nav-btn.prev:hover { background: rgba(255,255,255,0.15); }
+  .tour-nav-btn.next {
+    background: #22c55e;
+    color: #fff;
+  }
+  .tour-nav-btn.next:hover { background: #16a34a; }
 </style>
 </head>
 <body>
@@ -461,12 +590,18 @@
       <div class="customer-name">Atlas Construction</div>
     </div>
   </div>
-  <div class="header-logo">
-    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-      <rect width="36" height="36" rx="8" fill="#6c5ce7"/>
-      <path d="M10 22V14c0-1.1.9-2 2-2h3c1.1 0 2 .9 2 2v2c0 1.1-.9 2-2 2h-3m0 0v4m10-8v8m0-8c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3z" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-    PepTalk
+  <div style="display:flex;align-items:center;gap:16px;">
+    <button class="tour-btn" id="startTourBtn" onclick="startTour()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+      Take a Tour
+    </button>
+    <div class="header-logo">
+      <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+        <rect width="36" height="36" rx="8" fill="#6c5ce7"/>
+        <path d="M10 22V14c0-1.1.9-2 2-2h3c1.1 0 2 .9 2 2v2c0 1.1-.9 2-2 2h-3m0 0v4m10-8v8m0-8c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3z" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      PepTalk
+    </div>
   </div>
 </div>
 
@@ -487,16 +622,16 @@
   </div>
 
   <!-- Summary cards -->
-  <div class="summary-cards">
+  <div class="summary-cards" id="summary-cards">
     <div class="summary-card">
       <div class="label">Check-ins</div>
       <div class="value" id="totalCheckins">8,234</div>
-      <div class="change positive">+12.3% vs previous period</div>
+      <div class="change positive" id="checkinsChange">+12.3% vs previous period</div>
     </div>
     <div class="summary-card">
       <div class="label">Morale Score</div>
       <div class="value" id="moraleScore">64</div>
-      <div class="change negative">-4.1% vs previous period</div>
+      <div class="change negative" id="moraleChange">-4.1% vs previous period</div>
     </div>
     <div class="summary-card">
       <div class="label">Baseline</div>
@@ -511,7 +646,7 @@
   </div>
 
   <!-- Face distribution -->
-  <div class="face-row">
+  <div class="face-row" id="face-row">
     <div class="face-item">
       <div class="face-circle" style="background:rgba(229,62,62,0.15);">
         <svg width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="#e53e3e"/><circle cx="12" cy="14" r="2" fill="#fff"/><circle cx="24" cy="14" r="2" fill="#fff"/><path d="M11 25c2-3 5-4 7-4s5 1 7 4" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/><line x1="10" y1="10" x2="14" y2="12" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/><line x1="26" y1="10" x2="22" y2="12" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg>
@@ -563,23 +698,23 @@
 
   <!-- MORALE TAB -->
   <div class="tab-content active" id="tab-morale">
-    <div class="chart-card">
+    <div class="chart-card" id="weekly-chart">
       <h3>Weekly Morale Trend</h3>
       <div id="weeklyChart"></div>
     </div>
     <div class="chart-row">
-      <div class="chart-card">
+      <div class="chart-card" id="daily-chart">
         <h3>Daily Morale Patterns</h3>
         <div id="dailyChart"></div>
       </div>
-      <div class="chart-card">
+      <div class="chart-card" id="hourly-chart">
         <h3>Hourly Morale Patterns</h3>
         <div id="hourlyChart"></div>
       </div>
     </div>
 
     <!-- Breakdown by Kiosk -->
-    <div class="chart-card">
+    <div class="chart-card" id="kiosk-section">
       <h3>Breakdown by Kiosk</h3>
       <div class="kiosk-grid">
         <div class="kiosk-card">
@@ -666,10 +801,10 @@ const checkinsByMonths = {
 
 // ── Face data per filter ──
 const faceDataByMonths = {
-  1:  { total: 2847,  morale: 62, pcts: [18, 8, 12, 24, 38] },
-  3:  { total: 8234,  morale: 64, pcts: [15, 7, 13, 27, 38] },
-  6:  { total: 15891, morale: 63, pcts: [16, 8, 12, 25, 39] },
-  12: { total: 31456, morale: 61, pcts: [19, 9, 13, 23, 36] }
+  1:  { total: 2847,  morale: 59, pcts: [22, 9, 14, 22, 33], checkinsChange: '+8.4%', moraleChange: '-6.2%', moraleDir: 'negative' },
+  3:  { total: 8234,  morale: 64, pcts: [15, 7, 13, 27, 38], checkinsChange: '+12.3%', moraleChange: '-4.1%', moraleDir: 'negative' },
+  6:  { total: 15891, morale: 67, pcts: [12, 6, 11, 28, 43], checkinsChange: '+18.7%', moraleChange: '+2.3%', moraleDir: 'positive' },
+  12: { total: 31456, morale: 63, pcts: [17, 8, 13, 25, 37], checkinsChange: '+24.1%', moraleChange: '-1.8%', moraleDir: 'negative' }
 };
 
 function updateFaces(months) {
@@ -682,8 +817,14 @@ function updateFaces(months) {
     pctEls[i].textContent = p + '%';
     countEls[i].textContent = '~' + count.toLocaleString() + ' check-ins';
   });
-  // Update morale score summary card
+  // Update morale score and change indicators
   document.getElementById('moraleScore').textContent = data.morale;
+  const checkinsChangeEl = document.getElementById('checkinsChange');
+  checkinsChangeEl.textContent = data.checkinsChange + ' vs previous period';
+  checkinsChangeEl.className = 'change positive';
+  const moraleChangeEl = document.getElementById('moraleChange');
+  moraleChangeEl.textContent = data.moraleChange + ' vs previous period';
+  moraleChangeEl.className = 'change ' + data.moraleDir;
 }
 
 // ── Date Picker ──
