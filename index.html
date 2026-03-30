@@ -143,18 +143,24 @@
 <script>
 const map = L.map('map', { zoomControl: true }).setView([40, -20], 3);
 
-// Draw countries as subtle outlined shapes on dark background - matching reference style
+// Create a pane for countries that sits below markers
+map.createPane('countriesPane');
+map.getPane('countriesPane').style.zIndex = 200;
+
+// Draw countries as subtle outlined shapes on dark background
 fetch('https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson')
     .then(r => r.json())
     .then(data => {
         L.geoJSON(data, {
+            pane: 'countriesPane',
             style: {
                 fillColor: '#0f1018',
                 fillOpacity: 0.95,
                 color: '#3a5080',
                 weight: 0.7,
                 opacity: 0.5
-            }
+            },
+            interactive: false
         }).addTo(map);
     });
 
