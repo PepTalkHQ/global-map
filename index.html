@@ -11,8 +11,7 @@
         body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; background: #0a0b0f; }
         #map { height: calc(100vh - 64px); width: 100%; }
 
-        /* Let the dark map tiles render naturally - no filter overlay */
-        .leaflet-container { background: #0a0b0f; }
+        .leaflet-container { background: #fff; }
 
         /* Header bar */
         .header {
@@ -60,68 +59,68 @@
 
         /* Map popups */
         .leaflet-popup-content-wrapper {
-            background: #1a1b23 !important;
-            border: 1px solid rgba(255,255,255,0.1) !important;
+            background: #fff !important;
+            border: 1px solid #e5e7eb !important;
             border-radius: 12px !important;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.4) !important;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12) !important;
         }
-        .leaflet-popup-tip { background: #1a1b23 !important; border-color: rgba(255,255,255,0.1) !important; }
-        .leaflet-popup-close-button { color: rgba(255,255,255,0.4) !important; font-size: 18px !important; }
-        .leaflet-popup-close-button:hover { color: #fff !important; }
+        .leaflet-popup-tip { background: #fff !important; }
+        .leaflet-popup-close-button { color: #999 !important; font-size: 18px !important; }
+        .leaflet-popup-close-button:hover { color: #333 !important; }
 
         .city-label { padding: 4px 0; font-size: 13px; line-height: 1.5; max-width: 280px; }
-        .city-label h3 { margin: 0 0 2px 0; color: #22c55e; font-size: 15px; font-family: 'Lexend', sans-serif; font-weight: 600; }
-        .city-label .country { color: rgba(255,255,255,0.45); font-size: 12px; margin-bottom: 8px; }
-        .city-label .projects { font-size: 12px; color: rgba(255,255,255,0.75); }
+        .city-label h3 { margin: 0 0 2px 0; color: #16a34a; font-size: 15px; font-family: 'Lexend', sans-serif; font-weight: 600; }
+        .city-label .country { color: #999; font-size: 12px; margin-bottom: 8px; }
+        .city-label .projects { font-size: 12px; color: #555; }
         .city-label .projects div { padding: 2px 0; }
-        .city-label .projects strong { color: rgba(255,255,255,0.9); }
-        .city-label .inactive { color: rgba(255,255,255,0.35); font-style: italic; }
+        .city-label .projects strong { color: #333; }
+        .city-label .inactive { color: #bbb; font-style: italic; }
 
         /* Legend */
         .legend {
-            background: #1a1b23 !important;
-            border: 1px solid rgba(255,255,255,0.1);
+            background: #fff !important;
+            border: 1px solid #e5e7eb;
             padding: 14px 18px;
             border-radius: 12px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
             font-size: 13px;
             line-height: 1.8;
-            color: rgba(255,255,255,0.7);
+            color: #666;
         }
-        .legend h4 { margin: 0 0 8px 0; color: #fff; font-family: 'Lexend', sans-serif; font-weight: 600; }
+        .legend h4 { margin: 0 0 8px 0; color: #1a1b23; font-family: 'Lexend', sans-serif; font-weight: 600; }
         .legend .dot {
             display: inline-block; width: 10px; height: 10px;
             border-radius: 50%; margin-right: 8px; vertical-align: middle;
         }
-        .legend .us { background: #60a5fa; }
-        .legend .eu { background: #22c55e; }
-        .legend .uk { background: #f87171; }
-        .legend .ie { background: #a78bfa; }
-        .legend .ca { background: #fb923c; }
+        .legend .us { background: #3b82f6; }
+        .legend .eu { background: #16a34a; }
+        .legend .uk { background: #ef4444; }
+        .legend .ie { background: #8b5cf6; }
+        .legend .ca { background: #f97316; }
 
         /* Toggle */
         .toggle-bar {
-            background: #1a1b23 !important;
-            border: 1px solid rgba(255,255,255,0.1);
+            background: #fff !important;
+            border: 1px solid #e5e7eb;
             padding: 10px 16px;
             border-radius: 12px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
             font-size: 13px;
             cursor: pointer;
-            color: rgba(255,255,255,0.7);
+            color: #555;
         }
         .toggle-bar label { cursor: pointer; }
         .toggle-bar input { accent-color: #22c55e; margin-right: 6px; }
 
         /* Leaflet controls */
         .leaflet-control-zoom a {
-            background: #1a1b23 !important;
-            color: rgba(255,255,255,0.7) !important;
-            border-color: rgba(255,255,255,0.1) !important;
+            background: #fff !important;
+            color: #555 !important;
+            border-color: #e5e7eb !important;
         }
-        .leaflet-control-zoom a:hover { background: #252630 !important; color: #fff !important; }
-        .leaflet-control-attribution { background: rgba(10,11,15,0.8) !important; color: rgba(255,255,255,0.3) !important; }
-        .leaflet-control-attribution a { color: rgba(255,255,255,0.4) !important; }
+        .leaflet-control-zoom a:hover { background: #f5f5f5 !important; color: #111 !important; }
+        .leaflet-control-attribution { background: rgba(255,255,255,0.8) !important; color: #bbb !important; }
+        .leaflet-control-attribution a { color: #999 !important; }
     </style>
 </head>
 <body>
@@ -144,19 +143,25 @@
 <script>
 const map = L.map('map', { zoomControl: true }).setView([40, -20], 3);
 
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
     attribution: '',
     maxZoom: 18,
     subdomains: 'abcd'
 }).addTo(map);
+// Add labels on top so they sit above markers
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', {
+    maxZoom: 18,
+    subdomains: 'abcd',
+    pane: 'overlayPane'
+}).addTo(map);
 
 const regionColors = {
-    'US': '#60a5fa',
-    'EU': '#22c55e',
-    'UK': '#f87171',
-    'IE': '#a78bfa',
-    'CA': '#fb923c',
-    'AE': '#fbbf24'
+    'US': '#3b82f6',
+    'EU': '#16a34a',
+    'UK': '#ef4444',
+    'IE': '#8b5cf6',
+    'CA': '#f97316',
+    'AE': '#eab308'
 };
 
 const projects = [
