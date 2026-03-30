@@ -1,72 +1,167 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>PepTalk Global Project Map</title>
+    <title>PepTalk - Global Project Map</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
-        #map { height: 100vh; width: 100%; }
-        .city-label {
-            background: rgba(255,255,255,0.95);
-            border: 1px solid #4a86e8;
-            border-radius: 6px;
-            padding: 8px 12px;
-            font-size: 13px;
-            line-height: 1.4;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-            max-width: 300px;
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; background: #0a0b0f; }
+        #map { height: calc(100vh - 64px); width: 100%; }
+
+        /* Dark map tiles override */
+        .leaflet-tile-pane { filter: saturate(0.3) brightness(0.7); }
+        .leaflet-container { background: #0a0b0f; }
+
+        /* Header bar */
+        .header {
+            height: 64px;
+            background: linear-gradient(135deg, #0f1117 0%, #161822 100%);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
         }
-        .city-label h3 { margin: 0 0 4px 0; color: #4a86e8; font-size: 14px; }
-        .city-label .country { color: #666; font-size: 12px; margin-bottom: 6px; }
-        .city-label .projects { font-size: 12px; color: #333; }
-        .city-label .projects div { padding: 1px 0; }
-        .city-label .inactive { color: #999; font-style: italic; }
+        .header-left { display: flex; align-items: center; gap: 16px; }
+        .logo-text {
+            font-family: 'Lexend', sans-serif;
+            font-weight: 700;
+            font-size: 22px;
+            color: #fff;
+            letter-spacing: -0.5px;
+        }
+        .logo-icon {
+            width: 36px; height: 36px;
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .logo-icon svg { width: 22px; height: 22px; }
+        .header-subtitle {
+            font-size: 13px;
+            color: rgba(255,255,255,0.5);
+            font-weight: 400;
+            padding-left: 16px;
+            border-left: 1px solid rgba(255,255,255,0.12);
+        }
+        .header-right { display: flex; align-items: center; gap: 12px; }
+        .stat-pill {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.7);
+            font-weight: 500;
+        }
+        .stat-pill strong { color: #22c55e; font-weight: 600; }
+
+        /* Map popups */
+        .leaflet-popup-content-wrapper {
+            background: #1a1b23 !important;
+            border: 1px solid rgba(255,255,255,0.1) !important;
+            border-radius: 12px !important;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4) !important;
+        }
+        .leaflet-popup-tip { background: #1a1b23 !important; border-color: rgba(255,255,255,0.1) !important; }
+        .leaflet-popup-close-button { color: rgba(255,255,255,0.4) !important; font-size: 18px !important; }
+        .leaflet-popup-close-button:hover { color: #fff !important; }
+
+        .city-label { padding: 4px 0; font-size: 13px; line-height: 1.5; max-width: 280px; }
+        .city-label h3 { margin: 0 0 2px 0; color: #22c55e; font-size: 15px; font-family: 'Lexend', sans-serif; font-weight: 600; }
+        .city-label .country { color: rgba(255,255,255,0.45); font-size: 12px; margin-bottom: 8px; }
+        .city-label .projects { font-size: 12px; color: rgba(255,255,255,0.75); }
+        .city-label .projects div { padding: 2px 0; }
+        .city-label .projects strong { color: rgba(255,255,255,0.9); }
+        .city-label .inactive { color: rgba(255,255,255,0.35); font-style: italic; }
+
+        /* Legend */
         .legend {
-            background: white;
-            padding: 12px 16px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            background: #1a1b23 !important;
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 14px 18px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
             font-size: 13px;
             line-height: 1.8;
+            color: rgba(255,255,255,0.7);
         }
-        .legend h4 { margin: 0 0 6px 0; }
-        .legend .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
-        .legend .us { background: #4a86e8; }
-        .legend .eu { background: #38a169; }
-        .legend .uk { background: #e53e3e; }
-        .legend .ie { background: #805ad5; }
-        .legend .ca { background: #dd6b20; }
+        .legend h4 { margin: 0 0 8px 0; color: #fff; font-family: 'Lexend', sans-serif; font-weight: 600; }
+        .legend .dot {
+            display: inline-block; width: 10px; height: 10px;
+            border-radius: 50%; margin-right: 8px; vertical-align: middle;
+        }
+        .legend .us { background: #60a5fa; }
+        .legend .eu { background: #22c55e; }
+        .legend .uk { background: #f87171; }
+        .legend .ie { background: #a78bfa; }
+        .legend .ca { background: #fb923c; }
+
+        /* Toggle */
         .toggle-bar {
-            background: white; padding: 8px 14px; border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2); font-size: 13px; cursor: pointer;
+            background: #1a1b23 !important;
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 10px 16px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+            font-size: 13px;
+            cursor: pointer;
+            color: rgba(255,255,255,0.7);
         }
         .toggle-bar label { cursor: pointer; }
+        .toggle-bar input { accent-color: #22c55e; margin-right: 6px; }
+
+        /* Leaflet controls */
+        .leaflet-control-zoom a {
+            background: #1a1b23 !important;
+            color: rgba(255,255,255,0.7) !important;
+            border-color: rgba(255,255,255,0.1) !important;
+        }
+        .leaflet-control-zoom a:hover { background: #252630 !important; color: #fff !important; }
+        .leaflet-control-attribution { background: rgba(10,11,15,0.8) !important; color: rgba(255,255,255,0.3) !important; }
+        .leaflet-control-attribution a { color: rgba(255,255,255,0.4) !important; }
     </style>
 </head>
 <body>
+
+<div class="header">
+    <div class="header-left">
+        <div class="logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="white"/>
+            </svg>
+        </div>
+        <span class="logo-text">PepTalk</span>
+        <span class="header-subtitle">Global Project Footprint</span>
+    </div>
+    <div class="header-right" id="headerStats"></div>
+</div>
+
 <div id="map"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-const map = L.map('map').setView([40, -20], 3);
+const map = L.map('map', { zoomControl: true }).setView([40, -20], 3);
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors',
-    maxZoom: 18
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '',
+    maxZoom: 18,
+    subdomains: 'abcd'
 }).addTo(map);
 
 const regionColors = {
-    'US': '#4a86e8',
-    'EU': '#38a169',
-    'UK': '#e53e3e',
-    'IE': '#805ad5',
-    'CA': '#dd6b20',
-    'AE': '#d69e2e'
+    'US': '#60a5fa',
+    'EU': '#22c55e',
+    'UK': '#f87171',
+    'IE': '#a78bfa',
+    'CA': '#fb923c',
+    'AE': '#fbbf24'
 };
 
 const projects = [
-    // ===== ACTIVE - US =====
+    // ACTIVE - US
     {name:"Project Clydesdale",city:"Tulsa",country:"United States",lat:36.1540,lng:-95.9928,status:"Active",region:"US"},
     {name:"LeMartec/Microsoft SAT89/90",city:"San Antonio",country:"United States",lat:29.4241,lng:-98.4936,status:"Active",region:"US"},
     {name:"Sundt - Compass Phoenix",city:"Goodyear, AZ",country:"United States",lat:33.4353,lng:-112.3585,status:"Active",region:"US"},
@@ -91,7 +186,7 @@ const projects = [
     {name:"CMRichey",city:"New York",country:"United States",lat:40.7128,lng:-74.0060,status:"Active",region:"US"},
     {name:"Yondr Ops DC NOV1",city:"Aldie, VA",country:"United States",lat:38.9726,lng:-77.6411,status:"Active",region:"US"},
 
-    // ===== ACTIVE - Ireland =====
+    // ACTIVE - Ireland
     {name:"Team Joyce (AstraZeneca)",city:"Dublin",country:"Ireland",lat:53.3498,lng:-6.2603,status:"Active",region:"IE"},
     {name:"Team PepTalk",city:"Dublin",country:"Ireland",lat:53.3510,lng:-6.2620,status:"Active",region:"IE"},
     {name:"John Paul Construction",city:"Dublin",country:"Ireland",lat:53.3520,lng:-6.2580,status:"Active",region:"IE"},
@@ -104,11 +199,11 @@ const projects = [
     {name:"Team ADL1X",city:"Dublin",country:"Ireland",lat:53.3580,lng:-6.2520,status:"Active",region:"IE"},
     {name:"John Paul Drogheda",city:"Drogheda",country:"Ireland",lat:53.7179,lng:-6.3561,status:"Active",region:"IE"},
     {name:"Team Dexcom",city:"Athenry, Co Galway",country:"Ireland",lat:53.2939,lng:-8.7431,status:"Active",region:"IE"},
+    {name:"Team Powergate",city:"Dublin",country:"Ireland",lat:53.3590,lng:-6.2500,status:"Active",region:"IE"},
 
-    // ===== ACTIVE - UK =====
+    // ACTIVE - UK
     {name:"McLaren LO1969",city:"London",country:"United Kingdom",lat:51.5074,lng:-0.1278,status:"Active",region:"UK"},
     {name:"Yondr Collen Building C",city:"London",country:"United Kingdom",lat:51.5090,lng:-0.1250,status:"Active",region:"UK"},
-    {name:"Team Powergate",city:"London (Park Royal)",country:"United Kingdom",lat:51.5310,lng:-0.2640,status:"Active",region:"UK"},
     {name:"Team LD14",city:"Slough",country:"United Kingdom",lat:51.5105,lng:-0.5950,status:"Active",region:"UK"},
     {name:"GWE Brettenham",city:"London",country:"United Kingdom",lat:51.5100,lng:-0.1200,status:"Active",region:"UK"},
     {name:"LON1B",city:"Dagenham",country:"United Kingdom",lat:51.5464,lng:0.1547,status:"Active",region:"UK"},
@@ -117,7 +212,7 @@ const projects = [
     {name:"SigmaRoc",city:"Ipswich",country:"United Kingdom",lat:52.0567,lng:1.1482,status:"Active",region:"UK"},
     {name:"Team Newport",city:"Newport, Wales",country:"United Kingdom",lat:51.5842,lng:-2.9977,status:"Active",region:"UK"},
 
-    // ===== ACTIVE - Germany =====
+    // ACTIVE - Germany
     {name:"Cloud HQ Mercury FRA87",city:"Frankfurt",country:"Germany",lat:50.1109,lng:8.6821,status:"Active",region:"EU"},
     {name:"Team Frankfurt (AWS FRA44)",city:"Frankfurt",country:"Germany",lat:50.1130,lng:8.6850,status:"Active",region:"EU"},
     {name:"Team FR8.2 (Equinix)",city:"Frankfurt",country:"Germany",lat:50.1090,lng:8.6800,status:"Active",region:"EU"},
@@ -125,36 +220,36 @@ const projects = [
     {name:"Yondr Ops DC FRA1",city:"Frankfurt",country:"Germany",lat:50.1150,lng:8.6870,status:"Active",region:"EU"},
     {name:"Team FRA 134/135 (AWS)",city:"Frankfurt",country:"Germany",lat:50.1050,lng:8.6760,status:"Active",region:"EU"},
 
-    // ===== ACTIVE - Netherlands =====
-    {name:"H&MV/Google GRQ6a",city:"Groningen (Eemshaven)",country:"Netherlands",lat:53.4387,lng:6.8359,status:"Active",region:"EU"},
-    {name:"Team GRQ",city:"Groningen (Eemshaven)",country:"Netherlands",lat:53.4400,lng:6.8380,status:"Active",region:"EU"},
+    // ACTIVE - Netherlands
+    {name:"H&MV/Google GRQ6a",city:"Eemshaven",country:"Netherlands",lat:53.4387,lng:6.8359,status:"Active",region:"EU"},
+    {name:"Team GRQ",city:"Eemshaven",country:"Netherlands",lat:53.4400,lng:6.8380,status:"Active",region:"EU"},
     {name:"Yondr Ops DC NDHR1",city:"Middenmeer",country:"Netherlands",lat:52.8100,lng:4.9900,status:"Active",region:"EU"},
 
-    // ===== ACTIVE - Belgium =====
+    // ACTIVE - Belgium
     {name:"Google/PM Group GBL7",city:"Saint-Ghislain",country:"Belgium",lat:50.4500,lng:3.8200,status:"Active",region:"EU"},
     {name:"Team GBL6",city:"Baudour",country:"Belgium",lat:50.4700,lng:3.8400,status:"Active",region:"EU"},
     {name:"SAM3A Team",city:"Farciennes",country:"Belgium",lat:50.4300,lng:4.5400,status:"Active",region:"EU"},
 
-    // ===== ACTIVE - Spain =====
+    // ACTIVE - Spain
     {name:"Team Madrid (Microsoft MAD03)",city:"Meco, Madrid",country:"Spain",lat:40.5550,lng:-3.3200,status:"Active",region:"EU"},
-    {name:"Team IMDC (Iron Mountain)",city:"San Fernando de Henares, Madrid",country:"Spain",lat:40.4400,lng:-3.5300,status:"Active",region:"EU"},
+    {name:"Team IMDC (Iron Mountain)",city:"San Fernando de Henares",country:"Spain",lat:40.4400,lng:-3.5300,status:"Active",region:"EU"},
     {name:"H&MV/AWS",city:"Zaragoza",country:"Spain",lat:41.6488,lng:-0.8891,status:"Active",region:"EU"},
 
-    // ===== ACTIVE - Italy =====
-    {name:"Team ML08x (Equinix)",city:"Settimo Milanese, Milan",country:"Italy",lat:45.4780,lng:9.0640,status:"Active",region:"EU"},
-    {name:"Team ML09x (Equinix)",city:"Settimo Milanese, Milan",country:"Italy",lat:45.4760,lng:9.0620,status:"Active",region:"EU"},
-    {name:"Team MLSS2x (Equinix)",city:"Settimo Milanese, Milan",country:"Italy",lat:45.4800,lng:9.0660,status:"Active",region:"EU"},
+    // ACTIVE - Italy
+    {name:"Team ML08x (Equinix)",city:"Settimo Milanese",country:"Italy",lat:45.4780,lng:9.0640,status:"Active",region:"EU"},
+    {name:"Team ML09x (Equinix)",city:"Settimo Milanese",country:"Italy",lat:45.4760,lng:9.0620,status:"Active",region:"EU"},
+    {name:"Team MLSS2x (Equinix)",city:"Settimo Milanese",country:"Italy",lat:45.4800,lng:9.0660,status:"Active",region:"EU"},
 
-    // ===== ACTIVE - Sweden =====
+    // ACTIVE - Sweden
     {name:"Team Ersbo (Microsoft GVX04)",city:"Gavle",country:"Sweden",lat:60.6749,lng:17.1413,status:"Active",region:"EU"},
 
-    // ===== ACTIVE - France =====
+    // ACTIVE - France
     {name:"Team PA14 (Equinix)",city:"Aubervilliers, Paris",country:"France",lat:48.9130,lng:2.3830,status:"Active",region:"EU"},
 
-    // ===== ACTIVE - Canada =====
+    // ACTIVE - Canada
     {name:"Team Nighthawk (Yondr)",city:"Toronto",country:"Canada",lat:43.6532,lng:-79.3832,status:"Active",region:"CA"},
 
-    // ===== INACTIVE - US =====
+    // INACTIVE - US
     {name:"Lebanon Small Molecule",city:"Lebanon, IN",country:"United States",lat:40.0417,lng:-86.4692,status:"Inactive",region:"US"},
     {name:"Lebanon Tank Farm",city:"Lebanon, IN",country:"United States",lat:40.0430,lng:-86.4710,status:"Inactive",region:"US"},
     {name:"Lebanon Gen Site",city:"Lebanon, IN",country:"United States",lat:40.0440,lng:-86.4670,status:"Inactive",region:"US"},
@@ -166,43 +261,48 @@ const projects = [
     {name:"Turner Moderna",city:"Boston, MA",country:"United States",lat:42.3601,lng:-71.0589,status:"Inactive",region:"US"},
     {name:"Team Reddog (Fluor)",city:"Hillsboro, OR",country:"United States",lat:45.5229,lng:-122.9898,status:"Inactive",region:"US"},
 
-    // ===== INACTIVE - UK =====
+    // INACTIVE - UK
     {name:"SigmaRoc Buxton Lime",city:"Buxton, Derbyshire",country:"United Kingdom",lat:53.2590,lng:-1.9114,status:"Inactive",region:"UK"},
     {name:"Bath Stone Company",city:"Limpley Stoke, Bath",country:"United Kingdom",lat:51.3450,lng:-2.3200,status:"Inactive",region:"UK"},
-    {name:"Retaining UK",city:"Wellingborough",country:"United Kingdom",lat:52.3026,lng:-0.6940,status:"Inactive",region:"UK"},
+    {name:"Retaining UK (SigmaRoc)",city:"Wellingborough",country:"United Kingdom",lat:52.3026,lng:-0.6940,status:"Inactive",region:"UK"},
     {name:"Yondr Redkite",city:"London",country:"United Kingdom",lat:51.5060,lng:-0.1300,status:"Inactive",region:"UK"},
     {name:"Team WXT (Dornan)",city:"Cheshunt",country:"United Kingdom",lat:51.7010,lng:-0.0329,status:"Inactive",region:"UK"},
     {name:"CCP Building Products",city:"Middlewich, Cheshire",country:"United Kingdom",lat:53.1900,lng:-2.4400,status:"Inactive",region:"UK"},
-    {name:"Johnston Quarries",city:"Cheltenham / Grantham",country:"United Kingdom",lat:52.0500,lng:-0.6400,status:"Inactive",region:"UK"},
-    {name:"G.D. Harries (Cymru)",city:"Haverfordwest, Pembrokeshire",country:"United Kingdom",lat:51.8010,lng:-4.9710,status:"Inactive",region:"UK"},
+    {name:"Johnston Quarries",city:"Cheltenham",country:"United Kingdom",lat:52.0500,lng:-0.6400,status:"Inactive",region:"UK"},
+    {name:"G.D. Harries (Cymru)",city:"Haverfordwest",country:"United Kingdom",lat:51.8010,lng:-4.9710,status:"Inactive",region:"UK"},
     {name:"Poundfield",city:"Ipswich",country:"United Kingdom",lat:52.0590,lng:1.1500,status:"Inactive",region:"UK"},
     {name:"Allen Concrete",city:"Wellingborough",country:"United Kingdom",lat:52.3040,lng:-0.6920,status:"Inactive",region:"UK"},
 
-    // ===== INACTIVE - Ireland =====
+    // INACTIVE - Ireland
     {name:"Project Black (Walls)",city:"Newbridge, Kildare",country:"Ireland",lat:53.1814,lng:-6.7954,status:"Inactive",region:"IE"},
     {name:"Mace Pure Dub01",city:"Dublin (Ballycoolin)",country:"Ireland",lat:53.3950,lng:-6.3600,status:"Inactive",region:"IE"},
     {name:"WaterWipes",city:"Dundalk",country:"Ireland",lat:54.0037,lng:-6.4004,status:"Inactive",region:"IE"},
-    {name:"SigmaRoc Clogrennane",city:"Carlow / Ennis",country:"Ireland",lat:52.8361,lng:-6.9264,status:"Inactive",region:"IE"},
+    {name:"SigmaRoc Clogrennane",city:"Carlow",country:"Ireland",lat:52.8361,lng:-6.9264,status:"Inactive",region:"IE"},
     {name:"WuXi Biologics",city:"Dundalk",country:"Ireland",lat:54.0050,lng:-6.3980,status:"Inactive",region:"IE"},
     {name:"FBD Insurance",city:"Dublin",country:"Ireland",lat:53.3490,lng:-6.2610,status:"Inactive",region:"IE"},
     {name:"Arachas",city:"Dublin (Sandyford)",country:"Ireland",lat:53.2740,lng:-6.2230,status:"Inactive",region:"IE"},
     {name:"Global Payments",city:"Dublin",country:"Ireland",lat:53.3505,lng:-6.2590,status:"Inactive",region:"IE"},
     {name:"MSD (Rathgall)",city:"Dublin",country:"Ireland",lat:53.3515,lng:-6.2570,status:"Inactive",region:"IE"},
-    {name:"Fortus",city:"Dublin / Letchworth, UK",country:"Ireland",lat:53.3525,lng:-6.2550,status:"Inactive",region:"IE"},
     {name:"EXERTIS",city:"Dublin",country:"Ireland",lat:53.3535,lng:-6.2530,status:"Inactive",region:"IE"},
     {name:"Kirby",city:"Dublin",country:"Ireland",lat:53.3545,lng:-6.2510,status:"Inactive",region:"IE"},
-    {name:"PRL",city:"Dublin",country:"Ireland",lat:53.3555,lng:-6.2490,status:"Inactive",region:"IE"},
 
-    // ===== INACTIVE - Denmark =====
+    // INACTIVE - Denmark
     {name:"Fluor Milky Way",city:"Copenhagen",country:"Denmark",lat:55.6761,lng:12.5683,status:"Inactive",region:"EU"},
 
-    // ===== INACTIVE - UAE =====
+    // INACTIVE - UAE
     {name:"AbuDhabi",city:"Abu Dhabi",country:"UAE",lat:24.4539,lng:54.3773,status:"Inactive",region:"AE"},
-
-    // ===== INACTIVE - France =====
 ];
 
-// Group by city (round to 1 decimal to cluster nearby)
+// Header stats
+const activeCount = projects.filter(p => p.status === 'Active').length;
+const activeCountries = new Set(projects.filter(p => p.status === 'Active').map(p => p.country)).size;
+const activeCities = new Set(projects.filter(p => p.status === 'Active').map(p => p.city)).size;
+document.getElementById('headerStats').innerHTML =
+    '<span class="stat-pill"><strong>' + activeCount + '</strong> active projects</span>' +
+    '<span class="stat-pill"><strong>' + activeCities + '</strong> cities</span>' +
+    '<span class="stat-pill"><strong>' + activeCountries + '</strong> countries</span>';
+
+// Group by location
 function groupByLocation(items) {
     const groups = {};
     items.forEach(p => {
@@ -225,25 +325,33 @@ function buildMarkers(showInactive) {
 
     groups.forEach(g => {
         const total = g.active.length + g.inactive.length;
-        const color = regionColors[g.region] || '#333';
+        const color = regionColors[g.region] || '#888';
         const radius = Math.min(6 + total * 1.2, 16);
+
+        // Glowing marker effect
+        const glow = L.circleMarker([g.lat, g.lng], {
+            radius: radius + 6,
+            fillColor: color,
+            color: 'transparent',
+            fillOpacity: 0.15
+        }).addTo(layer);
 
         const marker = L.circleMarker([g.lat, g.lng], {
             radius: radius,
             fillColor: color,
-            color: '#fff',
-            weight: 2,
+            color: 'rgba(255,255,255,0.3)',
+            weight: 1.5,
             opacity: 1,
-            fillOpacity: 0.85
+            fillOpacity: 0.9
         }).addTo(layer);
 
         let html = '<div class="city-label"><h3>' + g.city + '</h3><div class="country">' + g.country + '</div><div class="projects">';
         if (g.active.length > 0) {
-            html += '<strong>' + g.active.length + ' active:</strong>';
+            html += '<strong>' + g.active.length + ' active project' + (g.active.length > 1 ? 's' : '') + ':</strong>';
             g.active.forEach(n => html += '<div>- ' + n + '</div>');
         }
         if (g.inactive.length > 0) {
-            html += '<div class="inactive" style="margin-top:4px"><strong>' + g.inactive.length + ' inactive:</strong>';
+            html += '<div class="inactive" style="margin-top:6px"><strong>' + g.inactive.length + ' inactive:</strong>';
             g.inactive.forEach(n => html += '<div>- ' + n + '</div>');
             html += '</div>';
         }
@@ -256,50 +364,34 @@ buildMarkers(false);
 activeLayer.addTo(map);
 buildMarkers(true);
 
-// Toggle control
+// Toggle
 const toggle = L.control({ position: 'topright' });
 toggle.onAdd = function() {
     const div = L.DomUtil.create('div', 'toggle-bar');
-    div.innerHTML = '<label><input type="checkbox" id="showInactive" onchange="toggleInactive(this.checked)"> Show inactive projects</label>';
-    div.onclick = function(e) { e.stopPropagation(); };
+    div.innerHTML = '<label><input type="checkbox" id="showInactive"> Show inactive projects</label>';
+    L.DomEvent.disableClickPropagation(div);
+    div.querySelector('input').addEventListener('change', function() {
+        if (this.checked) { map.removeLayer(activeLayer); allLayer.addTo(map); }
+        else { map.removeLayer(allLayer); activeLayer.addTo(map); }
+    });
     return div;
 };
 toggle.addTo(map);
-
-window.toggleInactive = function(show) {
-    if (show) { map.removeLayer(activeLayer); allLayer.addTo(map); }
-    else { map.removeLayer(allLayer); activeLayer.addTo(map); }
-};
 
 // Legend
 const legend = L.control({ position: 'bottomright' });
 legend.onAdd = function() {
     const div = L.DomUtil.create('div', 'legend');
-    const activeCount = projects.filter(p => p.status === 'Active').length;
-    const inactiveCount = projects.filter(p => p.status === 'Inactive').length;
-    div.innerHTML = '<h4>PepTalk Projects</h4>' +
-        '<div><span class="dot us"></span>United States (' + projects.filter(p=>p.region==='US'&&p.status==='Active').length + ')</div>' +
-        '<div><span class="dot ie"></span>Ireland (' + projects.filter(p=>p.region==='IE'&&p.status==='Active').length + ')</div>' +
-        '<div><span class="dot uk"></span>United Kingdom (' + projects.filter(p=>p.region==='UK'&&p.status==='Active').length + ')</div>' +
-        '<div><span class="dot eu"></span>Europe (' + projects.filter(p=>p.region==='EU'&&p.status==='Active').length + ')</div>' +
-        '<div><span class="dot ca"></span>Canada (1)</div>' +
-        '<div style="margin-top:8px;font-size:12px;color:#666;">' + activeCount + ' active / ' + inactiveCount + ' inactive</div>' +
-        '<div style="font-size:11px;color:#888;">Click pins for details</div>';
+    div.innerHTML = '<h4>Regions</h4>' +
+        '<div><span class="dot us"></span>United States</div>' +
+        '<div><span class="dot ie"></span>Ireland</div>' +
+        '<div><span class="dot uk"></span>United Kingdom</div>' +
+        '<div><span class="dot eu"></span>Europe</div>' +
+        '<div><span class="dot ca"></span>Canada</div>' +
+        '<div style="margin-top:10px;font-size:11px;color:rgba(255,255,255,0.35);">Click pins for details</div>';
     return div;
 };
 legend.addTo(map);
-
-// Title
-const title = L.control({ position: 'topleft' });
-title.onAdd = function() {
-    const div = L.DomUtil.create('div', 'legend');
-    const cities = new Set(projects.filter(p=>p.status==='Active').map(p=>p.city));
-    const countries = new Set(projects.filter(p=>p.status==='Active').map(p=>p.country));
-    div.innerHTML = '<h4 style="margin:0;font-size:16px;">PepTalk Global Footprint</h4>' +
-        '<div style="font-size:12px;color:#666;">' + projects.filter(p=>p.status==='Active').length + ' active projects across ' + cities.size + ' cities in ' + countries.size + ' countries</div>';
-    return div;
-};
-title.addTo(map);
 </script>
 </body>
 </html>
