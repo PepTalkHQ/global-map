@@ -591,7 +591,7 @@
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:16px;">
-    <button class="tour-btn" id="startTourBtn" onclick="startTour()">
+    <button class="tour-btn" id="startTourBtn">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
       Take a Tour
     </button>
@@ -1203,6 +1203,228 @@ function renderFeedback(items, containerId, color) {
 }
 renderFeedback(negItems, 'feedback-negative', '#e53e3e');
 renderFeedback(posItems, 'feedback-positive', '#38a169');
+
+// ── Guided Tour ──
+const tourStops = [
+  {
+    target: '#summary-cards',
+    title: 'Performance at a Glance',
+    desc: 'See total workforce engagement, the current morale score, your project\'s established baseline, and the industry benchmark - all in real time.'
+  },
+  {
+    target: '#face-row',
+    title: 'Workforce Mood Distribution',
+    desc: 'Understand how your workforce is feeling right now. Each check-in captures a morale response - the distribution shows the balance between positive and negative sentiment across your team.'
+  },
+  {
+    target: '#weekly-chart',
+    title: 'Weekly Morale Trend',
+    desc: 'Track morale week by week against your baseline. Green means healthy, yellow signals caution, and red is a warning. Two consecutive red weeks triggers an alert - giving you time to intervene before issues escalate.'
+  },
+  {
+    target: '#daily-chart',
+    title: 'Daily Patterns',
+    desc: 'Identify which days of the week morale dips. Use this to time safety briefings, team talks, or welfare check-ins on the days your workforce needs them most.'
+  },
+  {
+    target: '#hourly-chart',
+    title: 'Hourly Patterns',
+    desc: 'See when during the shift workers feel best and worst. Optimise break times, toolbox talks, and supervisor walk-arounds to target the low points.'
+  },
+  {
+    target: '#kiosk-section',
+    title: 'Location Breakdown',
+    desc: 'Compare morale across different kiosk locations on site. Quickly pinpoint which areas need attention - a red kiosk means that zone\'s workforce is under pressure.'
+  },
+  {
+    target: '[data-tab="spotcheck"]',
+    title: 'Targeted Spotchecks',
+    desc: 'Deploy quick pulse surveys on safety, operations, or engagement topics. Spotchecks give you the \'why\' behind morale shifts - direct from the workforce, in their own words.',
+    clickTab: 'spotcheck'
+  },
+  {
+    target: '[data-tab="feedback"]',
+    title: 'Continuous Feedback',
+    desc: 'Every check-in captures what workers think could be better and what\'s working well. This real-time feedback loop surfaces issues before they become incidents.',
+    clickTab: 'feedback'
+  }
+];
+
+let tourCurrentStep = 0;
+let tourOverlay = null;
+let tourTooltip = null;
+let tourActive = false;
+
+function startTour() {
+  if (tourActive) return;
+  tourActive = true;
+  tourCurrentStep = 0;
+
+  // Switch to morale tab first
+  switchTab('morale');
+
+  // Create overlay
+  tourOverlay = document.createElement('div');
+  tourOverlay.className = 'tour-overlay';
+  document.body.appendChild(tourOverlay);
+
+  // Create tooltip
+  tourTooltip = document.createElement('div');
+  tourTooltip.className = 'tour-tooltip';
+  document.body.appendChild(tourTooltip);
+
+  showTourStep(0);
+}
+
+function switchTab(tabName) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  const tabBtn = document.querySelector('[data-tab="' + tabName + '"]');
+  if (tabBtn) tabBtn.classList.add('active');
+  const tabContent = document.getElementById('tab-' + tabName);
+  if (tabContent) tabContent.classList.add('active');
+}
+
+function showTourStep(stepIndex) {
+  // Remove previous highlight
+  const prevHighlight = document.querySelector('.tour-highlight');
+  if (prevHighlight) prevHighlight.classList.remove('tour-highlight');
+
+  const stop = tourStops[stepIndex];
+
+  // Click tab if needed
+  if (stop.clickTab) {
+    switchTab(stop.clickTab);
+  }
+
+  // Small delay to let tab content render
+  setTimeout(function() {
+    const el = document.querySelector(stop.target);
+    if (!el) return;
+
+    // Highlight
+    el.classList.add('tour-highlight');
+
+    // Scroll into view
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    // Position tooltip after scroll settles
+    setTimeout(function() { positionTooltip(el, stepIndex); }, 400);
+  }, stop.clickTab ? 100 : 10);
+}
+
+function positionTooltip(el, stepIndex) {
+  var stop = tourStops[stepIndex];
+  var total = tourStops.length;
+  var rect = el.getBoundingClientRect();
+
+  // Build tooltip content
+  tourTooltip.innerHTML =
+    '<div class="tour-tooltip-arrow arrow-top" id="tour-arrow"></div>' +
+    '<div class="tour-step-counter">' + (stepIndex + 1) + ' of ' + total + '</div>' +
+    '<div class="tour-title">' + stop.title + '</div>' +
+    '<div class="tour-desc">' + stop.desc + '</div>' +
+    '<div class="tour-actions">' +
+      '<button class="tour-skip" onclick="endTour()">Skip Tour</button>' +
+      '<div class="tour-nav">' +
+        (stepIndex > 0 ? '<button class="tour-nav-btn prev" onclick="tourPrev()">Previous</button>' : '') +
+        '<button class="tour-nav-btn next" onclick="tourNext()">' + (stepIndex === total - 1 ? 'Finish' : 'Next') + '</button>' +
+      '</div>' +
+    '</div>';
+
+  // Calculate position - prefer below the element, fall back to above
+  var tooltipWidth = 360;
+  var margin = 16;
+  var scrollY = window.scrollY;
+  var scrollX = window.scrollX;
+
+  var top, left;
+  var spaceBelow = window.innerHeight - rect.bottom;
+  var arrow = tourTooltip.querySelector('#tour-arrow');
+
+  if (spaceBelow > 220) {
+    // Place below
+    top = rect.bottom + scrollY + margin;
+    arrow.className = 'tour-tooltip-arrow arrow-top';
+  } else {
+    // Place above
+    top = rect.top + scrollY - margin - 220;
+    arrow.className = 'tour-tooltip-arrow arrow-bottom';
+  }
+
+  // Horizontal: align with left of element, but keep on screen
+  left = rect.left + scrollX;
+  if (left + tooltipWidth > window.innerWidth - 20) {
+    left = window.innerWidth - tooltipWidth - 20;
+  }
+  if (left < 20) left = 20;
+
+  // Adjust arrow horizontal position to point at element center
+  var elCenterX = rect.left + rect.width / 2;
+  var arrowLeft = Math.max(16, Math.min(tooltipWidth - 28, elCenterX - left));
+  arrow.style.left = arrowLeft + 'px';
+
+  tourTooltip.style.top = top + 'px';
+  tourTooltip.style.left = left + 'px';
+}
+
+function tourNext() {
+  if (tourCurrentStep < tourStops.length - 1) {
+    tourCurrentStep++;
+    showTourStep(tourCurrentStep);
+  } else {
+    endTour();
+  }
+}
+
+function tourPrev() {
+  if (tourCurrentStep > 0) {
+    tourCurrentStep--;
+    // If going back from a tab stop, switch back to morale
+    var stop = tourStops[tourCurrentStep];
+    if (!stop.clickTab && tourCurrentStep <= 5) {
+      switchTab('morale');
+    }
+    showTourStep(tourCurrentStep);
+  }
+}
+
+function endTour() {
+  tourActive = false;
+
+  // Remove highlight
+  var highlighted = document.querySelector('.tour-highlight');
+  if (highlighted) highlighted.classList.remove('tour-highlight');
+
+  // Remove overlay and tooltip
+  if (tourOverlay) { tourOverlay.remove(); tourOverlay = null; }
+  if (tourTooltip) { tourTooltip.remove(); tourTooltip = null; }
+
+  // Switch back to Morale Breakdown tab
+  switchTab('morale');
+}
+
+// Start tour button
+document.getElementById('startTourBtn').addEventListener('click', function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  startTour();
+});
+
+// Close tour on overlay click
+document.addEventListener('click', function(e) {
+  if (tourActive && e.target === tourOverlay) {
+    endTour();
+  }
+});
+
+// Reposition tooltip on window resize
+window.addEventListener('resize', function() {
+  if (!tourActive) return;
+  var stop = tourStops[tourCurrentStep];
+  var el = document.querySelector(stop.target);
+  if (el) positionTooltip(el, tourCurrentStep);
+});
 </script>
 </body>
 </html>
