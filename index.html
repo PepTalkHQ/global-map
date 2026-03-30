@@ -302,13 +302,18 @@ const projects = [
 ];
 
 // Header stats
-const activeCount = projects.filter(p => p.status === 'Active').length;
-const activeCountries = new Set(projects.filter(p => p.status === 'Active').map(p => p.country)).size;
-const activeCities = new Set(projects.filter(p => p.status === 'Active').map(p => p.city)).size;
-document.getElementById('headerStats').innerHTML =
-    '<span class="stat-pill"><strong>' + activeCount + '</strong> active projects</span>' +
-    '<span class="stat-pill"><strong>' + activeCities + '</strong> cities</span>' +
-    '<span class="stat-pill"><strong>' + activeCountries + '</strong> countries</span>';
+function updateStats(showAll) {
+    const filtered = showAll ? projects : projects.filter(p => p.status === 'Active');
+    const count = filtered.length;
+    const countries = new Set(filtered.map(p => p.country)).size;
+    const cities = new Set(filtered.map(p => p.city)).size;
+    const label = showAll ? 'total projects' : 'active projects';
+    document.getElementById('headerStats').innerHTML =
+        '<span class="stat-pill"><strong>' + count + '</strong> ' + label + '</span>' +
+        '<span class="stat-pill"><strong>' + cities + '</strong> cities</span>' +
+        '<span class="stat-pill"><strong>' + countries + '</strong> countries</span>';
+}
+updateStats(false);
 
 // Group by location
 function groupByLocation(items) {
@@ -379,8 +384,8 @@ toggle.onAdd = function() {
     div.innerHTML = '<label><input type="checkbox" id="showInactive"> Show inactive projects</label>';
     L.DomEvent.disableClickPropagation(div);
     div.querySelector('input').addEventListener('change', function() {
-        if (this.checked) { map.removeLayer(activeLayer); allLayer.addTo(map); }
-        else { map.removeLayer(allLayer); activeLayer.addTo(map); }
+        if (this.checked) { map.removeLayer(activeLayer); allLayer.addTo(map); updateStats(true); }
+        else { map.removeLayer(allLayer); activeLayer.addTo(map); updateStats(false); }
     });
     return div;
 };
