@@ -982,6 +982,40 @@ function updateWeeklyChart() {
   const scores = currentWeeklyData.map(w => w.score);
   const colors = currentWeeklyData.map(w => getBarColor(w.score));
 
+  // Find consecutive red weeks for alert annotations
+  const xAnnotations = [];
+  const pointAnnotations = [];
+  for (let i = 0; i < scores.length - 1; i++) {
+    if (scores[i] < 54 && scores[i + 1] < 54) {
+      xAnnotations.push({
+        x: categories[i],
+        x2: categories[i + 1],
+        fillColor: 'rgba(229,62,62,0.12)',
+        borderColor: '#e53e3e',
+        label: {
+          text: '\u26a0\ufe0f Alert Triggered - Consecutive Warning Weeks',
+          style: { color: '#fff', background: '#e53e3e', fontSize: '11px', fontFamily: 'Lexend', padding: { left: 8, right: 8, top: 4, bottom: 4 } },
+          orientation: 'horizontal',
+          position: 'top'
+        }
+      });
+      // Mark the next week as high risk window
+      if (i + 2 < scores.length) {
+        pointAnnotations.push({
+          x: categories[i + 2],
+          y: scores[i + 2],
+          marker: { size: 8, fillColor: '#ed8936', strokeColor: '#fff', strokeWidth: 2 },
+          label: {
+            text: 'High Risk Window',
+            style: { color: '#fff', background: '#ed8936', fontSize: '11px', fontFamily: 'Lexend', padding: { left: 8, right: 8, top: 4, bottom: 4 } },
+            offsetY: -15
+          }
+        });
+      }
+      break; // Only annotate the first streak
+    }
+  }
+
   const opts = {
     series: [{
       name: 'Morale',
@@ -1020,7 +1054,9 @@ function updateWeeklyChart() {
           offsetX: -10,
           style: { color: '#fff', background: '#6c5ce7', fontSize: '11px', padding: { left: 8, right: 8, top: 4, bottom: 4 } }
         }
-      }]
+      }],
+      xaxis: xAnnotations,
+      points: pointAnnotations
     },
     xaxis: {
       categories,
@@ -1222,6 +1258,11 @@ const tourStops = [
     desc: 'Track morale week by week against your baseline. Green means healthy, yellow signals caution, and red is a warning. Two consecutive red weeks triggers an alert - giving you time to intervene before issues escalate.'
   },
   {
+    target: '#weekly-chart',
+    title: 'Consecutive Warning Alert',
+    desc: 'When morale drops into the red warning zone for two consecutive weeks, PepTalk triggers an alert. The following week is flagged as a high risk window - this is your intervention point. In the data here, you can see exactly where the alert fired and the recovery that followed.'
+  },
+  {
     target: '#daily-chart',
     title: 'Daily Patterns',
     desc: 'Identify which days of the week morale dips. Use this to time safety briefings, team talks, or welfare check-ins on the days your workforce needs them most.'
@@ -1237,15 +1278,15 @@ const tourStops = [
     desc: 'Compare morale across different kiosk locations on site. Quickly pinpoint which areas need attention - a red kiosk means that zone\'s workforce is under pressure.'
   },
   {
-    target: '[data-tab="spotcheck"]',
+    target: '#tab-spotcheck',
     title: 'Targeted Spotchecks',
     desc: 'Deploy quick pulse surveys on safety, operations, or engagement topics. Spotchecks give you the \'why\' behind morale shifts - direct from the workforce, in their own words.',
     clickTab: 'spotcheck'
   },
   {
-    target: '[data-tab="feedback"]',
+    target: '#tab-feedback',
     title: 'Continuous Feedback',
-    desc: 'Every check-in captures what workers think could be better and what\'s working well. This real-time feedback loop surfaces issues before they become incidents.',
+    desc: 'Every check-in captures what workers think could be better and what\'s working well on site. This real-time feedback loop surfaces trending issues early - and can be used to guide targeted spotchecks on the topics that matter most to your workforce.',
     clickTab: 'feedback'
   }
 ];
@@ -1382,7 +1423,7 @@ function tourPrev() {
     tourCurrentStep--;
     // If going back from a tab stop, switch back to morale
     var stop = tourStops[tourCurrentStep];
-    if (!stop.clickTab && tourCurrentStep <= 5) {
+    if (!stop.clickTab && tourCurrentStep <= 6) {
       switchTab('morale');
     }
     showTourStep(tourCurrentStep);
